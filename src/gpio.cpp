@@ -79,10 +79,6 @@
         };                                                    \
     };
 
-// Вход-выход
-// const int INPUT = 0;
-// const int OUTPUT = 1;
-
 // Класс линии ввода вывода
 template <class PORT, uint8_t PIN>
 class TPin

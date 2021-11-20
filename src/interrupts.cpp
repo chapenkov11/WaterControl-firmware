@@ -26,6 +26,5 @@ ISR(TIMER2_OVF_vect)
 
 ISR(TIMER0_OVF_vect)
 {
-    // PORTD ^= (1 << PORT_ZUMMER);
     Zummer::Toggle();
 }

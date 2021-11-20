@@ -3,8 +3,6 @@
 #include "valve.h"
 #include "settings.h"
 
-// bool lowBat = 0; // заряд батареи, 1 - низкий
-
 uint16_t getVCC()
 {
     Adc::enable();
