@@ -1,3 +1,6 @@
+#ifndef settings_h
+#define settings_h
+
 #include "gpio.h"
 
 #define f_cpu 1000000 // частота микроконтроллера
@@ -43,3 +46,5 @@ typedef Pb0 Led;            // Сигнальный светодиод - PB0
                            при выключенном преобразователе */
 
 #define AVG_NUMBER 100 // количество измерений тока крана для усреднения
+
+#endif
