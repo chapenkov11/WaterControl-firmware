@@ -9,7 +9,7 @@ extern bool valveFlag;   // целевое положение крана (в к�
 extern bool valveStatus; // текущее положение крана
 extern bool lowBat;
 extern uint32_t nextCheckBat, nextCheckValv, nextSignal, nextLed;
-extern uint32_t mainTimer;
+extern uint32_t time;
 
 void setValve(bool status);
 bool getValveStatus();

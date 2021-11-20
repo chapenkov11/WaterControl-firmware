@@ -15,10 +15,11 @@
 #include "power.h"
 #include "zummer.h"
 #include "interrupts.h"
+#include "time.h"
 
 // Глобальные переменные
-volatile uint32_t sleepCount = 0;
-uint32_t mainTimer;
+
+uint32_t time = 0; // Системное время
 uint32_t nextCheckBat = INTERVAL_CHECK_BAT, nextCheckValv = INTERVAL_CHECK_VALV, nextSignal = INTERVAL_SIGNAL, nextLed = INTERVAL_LED;
 bool valveFlag = CLOSE;      // целевое положение крана (в которое нужно перевести)
 bool valveStatus = OPEN;     // текущее положение крана
@@ -53,9 +54,7 @@ int main()
   // Главный цикл
   while (1)
   {
-    cli();
-    mainTimer = sleepCount;
-    sei();
+    time_update();
 
     // Обработка нажатия кнопки
     if (!Button::IsSet())
@@ -115,13 +114,13 @@ int main()
             }
             stopTimer0();
           }
-          nextSignal = mainTimer + 43200; // Отложить сигналы на сутки
+          nextSignal = time + 43200; // Отложить сигналы на сутки
         }
       }
     }
 
     // Проверка напряжения батареи
-    if (mainTimer >= nextCheckBat)
+    if (time >= nextCheckBat)
     {
 #ifdef SERIAL_LOG_MAIN_ON
       LOG("Проверка напряжения батареи");
@@ -130,7 +129,7 @@ int main()
       {
         lowBat = 1;
       }
-      nextCheckBat = mainTimer + INTERVAL_CHECK_BAT;
+      nextCheckBat = time + INTERVAL_CHECK_BAT;
     }
 
     // Закрытие крана
@@ -165,7 +164,7 @@ int main()
     }
 
     // Профилактика закисания крана - закрыть-открыть
-    if ((mainTimer >= nextCheckValv) && (alarmFlag == 0 || lowBat == 0))
+    if ((time >= nextCheckValv) && (alarmFlag == 0 || lowBat == 0))
     {
 #ifdef SERIAL_LOG_MAIN_ON
       LOG("Профилактика закисания");
@@ -178,11 +177,11 @@ int main()
           setValve(OPEN);
         }
       }
-      nextCheckValv = mainTimer + INTERVAL_CHECK_VALV;
+      nextCheckValv = time + INTERVAL_CHECK_VALV;
     }
 
     // Звуковая сигнализация при тревоге и низком заряде батареи
-    if (mainTimer >= nextSignal)
+    if (time >= nextSignal)
     {
 #ifdef SERIAL_LOG_MAIN_ON
       LOG("Сигнал");
@@ -213,11 +212,11 @@ int main()
         }
         stopTimer0();
       }
-      nextSignal = mainTimer + INTERVAL_SIGNAL;
+      nextSignal = time + INTERVAL_SIGNAL;
     }
 
     // Мигание светодиодом
-    if (mainTimer >= nextLed)
+    if (time >= nextLed)
     {
       if ((alarmFlag == 0) && (lowBat == 0))
       {
@@ -249,7 +248,7 @@ int main()
           }
         }
       }
-      nextLed = mainTimer + INTERVAL_LED;
+      nextLed = time + INTERVAL_LED;
     }
 
 #ifdef SERIAL_LOG_MAIN_ON

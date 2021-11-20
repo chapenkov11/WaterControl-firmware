@@ -19,11 +19,6 @@ ISR(INT0_vect)
 #endif
 }
 
-ISR(TIMER2_OVF_vect)
-{
-    sleepCount++;
-}
-
 ISR(TIMER0_OVF_vect)
 {
     Zummer::Toggle();

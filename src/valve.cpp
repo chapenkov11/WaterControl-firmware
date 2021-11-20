@@ -121,8 +121,8 @@ void setValve(bool status)
 
     Adc::disable();
     valveOff();
-    nextCheckValv = mainTimer + INTERVAL_CHECK_VALV; // отложить проверку на закисание
-    nextCheckBat = mainTimer + INTERVAL_CHECK_BAT;   // отложить проверку батареи
+    nextCheckValv = time + INTERVAL_CHECK_VALV; // отложить проверку на закисание
+    nextCheckBat = time + INTERVAL_CHECK_BAT;   // отложить проверку батареи
 }
 
 bool getValveStatus()
