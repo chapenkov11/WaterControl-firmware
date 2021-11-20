@@ -10,21 +10,7 @@
 #include "settings.cpp"
 #include "debug.cpp"
 #include "gpio.h"
-
-// TPin<PortB, 4> Led1;
-// TPin<PortB, 3> Led2;
-
-// Led1.SetDirWrite();
-// Led2.SetDirWrite();
-// Led1.Set(1);
-// LED_PORT |= 1 << LED_PIN;
-// // LED::Set();
-// // Led1.Set();
-// Led2.Set();
-// LED_PORT &= ~(1 << LED_PIN);
-// // LED::Clear();
-// // Led1.Clear();
-// Led2.Clear();
+#include "adc.h"
 
 // Положение крана
 #define CLOSE 0
@@ -39,7 +25,7 @@ uint32_t nextCheckBat = INTERVAL_CHECK_BAT, nextCheckValv = INTERVAL_CHECK_VALV,
 #define zummerOff()       \
   TIMSK &= ~(1 << TOIE0); \
   Zummer::Clear();
-// PORTD &= ~(1 << PORT_ZUMMER); // выкл. прерывание совпадения
+// выкл. прерывание совпадения
 
 // Без зуммера
 //#define zummerOn() PORTD &= ~(1<<PORT_ZUMMER); // вкл. прерывание переполнения
@@ -57,13 +43,11 @@ volatile bool alarmFlag = 0; // 1 - тревога
 void setValve(bool status);
 //bool getValveCurr();
 bool getValveStatus();
-void ADCinit();
 void INT0init();
 void initSleepTimer();
 void resetSleepTimer();
 void initTimer0();
 void stopTimer0();
-void setADCinput(uint8_t numADC);
 uint16_t getVCC();
 void valveOff();
 void valveOnDirect();
@@ -92,7 +76,7 @@ int main()
   zummerOff();
   stopTimer0();
   Led::Off();
-  ADCinit();
+  Adc::init(presc_128, ref_Vcc); //Делитель 128 = 64 кГц, VCC
   INT0init();
   // Главный цикл
   while (1)
@@ -339,8 +323,8 @@ void setValve(bool status)
 #ifdef SERIAL_LOG_MAIN_ON
   LOG("Переключение крана");
 #endif
-  ADCSRA |= (1 << ADEN); // вкл. АЦП
-  setADCinput(3);
+  Adc::enable();
+  Adc::setInput(ADC3);
 
   uint8_t count = 5;
   uint16_t timeWork = 20; // при цикле через 500 мс - время включения противозастревательного
@@ -423,7 +407,7 @@ void setValve(bool status)
     lowBat = 1;
   }
 
-  ADCSRA &= ~(1 << ADEN); // выкл. АЦП
+  Adc::disable();
   valveOff();
   nextCheckValv = mainTimer + INTERVAL_CHECK_VALV; // отложить проверку на закисание
   nextCheckBat = mainTimer + INTERVAL_CHECK_BAT;   // отложить проверку батареи
@@ -433,41 +417,17 @@ void setValve(bool status)
 bool getValveCurr()
 {
 #define AVG_N 50
-  // Сделать 1000 измерений и отправить в COM-порт
   for (uint32_t i = 0; i < 100; i++)
   {
-    uint64_t ADCsumm = 0;
-    for (uint16_t c = 0; c < AVG_N; c++)
-    {
-      ADCSRA |= (1 << ADSC); //Начинаем преобразование
-      while ((ADCSRA & (1 << ADSC)))
-        ; //проверим закончилось ли аналого-цифровое преобразование
-      ADCsumm += ADC;
-    }
-    //Serial.println(round(ADCsumm/AVG_N)); // результат преобразования
+    // Serial.println(Adc::getAVGofN(AVG_N)); // результат преобразования
     _delay_ms(100);
   }
   return 0;
 }
 
-void ADCinit()
-{
-  ADCSRA |= (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0); //Делитель 128 = 64 кГц
-  ADMUX &= ~((1 << REFS1) | (1 << REFS0));              // Varef
-  ADMUX |= 1 << REFS0;                                  // ИОН = VCC, вход ADC0
-}
-
 bool getValveStatus()
 {
-  uint64_t ADCsumm = 0;
-  for (uint8_t i = 0; i <= AVG_NUMBER; i++)
-  {
-    ADCSRA |= (1 << ADSC); // Начинаем преобразование
-    while ((ADCSRA & (1 << ADSC)))
-      ; // проверим закончилось ли аналого-цифровое преобразование
-    ADCsumm += ADC;
-  }
-  uint16_t ADCavg = round(ADCsumm / AVG_NUMBER);
+  uint16_t ADCavg = Adc::getAVGofN(AVG_NUMBER);
   if (ADCavg <= 1)
   {
     return 0;
@@ -597,30 +557,10 @@ void stopTimer0()
   TIFR &= ~(1 << TOV0);                                // сброс флаг переполнения
 }
 
-void setADCinput(uint8_t numADC)
-{
-  ADMUX &= ~((1 << MUX0) | (1 << MUX1) | (1 << MUX2) | (1 << MUX3)); // установка всех бит в 0 = вход ADC0
-  switch (numADC)
-  {
-  case 0:
-    break;
-  case 2:
-    ADMUX |= (1 << MUX1); // ADC2
-    break;
-  case 3:
-    ADMUX |= (1 << MUX0) | (1 << MUX1); // вход ADC3;
-    break;
-  }
-  // пробное преобразование для стабилизации результата
-  ADCSRA |= (1 << ADSC); //Начинаем преобразование
-  while ((ADCSRA & (1 << ADSC)))
-    ; //проверим закончилось ли аналого-цифровое преобразование
-}
-
 uint16_t getVCC()
 {
-  ADCSRA |= (1 << ADEN); // вкл. АЦП
-  setADCinput(2);
+  Adc::enable();
+  Adc::setInput(ADC2);
   if (valveStatus == OPEN)
   {
     valveOnRevers();
@@ -630,17 +570,10 @@ uint16_t getVCC()
     valveOnDirect();
   }
   // Замеряем напряжение батареи
-  uint32_t ADCsumm = 0;
-  for (uint8_t i = 0; i <= 50; i++)
-  {
-    ADCSRA |= (1 << ADSC); //Начинаем преобразование
-    while ((ADCSRA & (1 << ADSC)))
-      ; //проверим закончилось ли аналого-цифровое преобразование
-    ADCsumm += ADC;
-  }
+  uint16_t AVG = Adc::getAVGofN(50);
   // Выкл. преобзователь и реле
   valveOff();
-  ADCSRA &= ~(1 << ADEN); // выкл. АЦП
+  Adc::disable();
   // Делитель 2000/1000 Om
   // r1 = 2000, r2 = 1000
   // VCC = U2*(r1+r2)/r2
@@ -649,7 +582,7 @@ uint16_t getVCC()
   // VCC = Vref*ADCavg*(3000/1024*1000)
   // VCC = Vref*ADCavg*(3/1024)
 
-  uint16_t volt = round((VREF * ADCsumm * 3) / 51200);
+  uint16_t volt = round((VREF * AVG * 3) / 1024);
 
 #ifdef SERIAL_LOG_MAIN_ON
   Serial.print("Напряжение батареи: ");
