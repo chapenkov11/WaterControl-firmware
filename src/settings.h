@@ -8,13 +8,22 @@
 #define VREF 2950          // опорное напряжение питания, мВ (подобрать для адекватного измерения напряжения батареи)
 #define MIN_BAT_LEVEL 4500 // минимальное напряжение батареи, мВ
 
+// Для отладочной платы
 // Установка пинов МК
 typedef Pd5 ValvePower;     // PD5 выход вкл преобразователя напряжения
 typedef Pd7 ValveDirection; // PD7 выход реверса - включения реле
 typedef Pd2 Alarm;          // PD2 вход тревоги с Gidrolock
 typedef Pd3 Button;         // PD3 кнопка управления
-typedef Pd6 Zummer;         // PD6 подключение базы транзистора пьезоизлучателя
-typedef Pb0 Led;            // Сигнальный светодиод - PB0
+typedef Pb0 Zummer;         // PD6 подключение базы транзистора пьезоизлучателя
+typedef Pd4 Led;            // Сигнальный светодиод - PB0
+
+// Установка пинов МК
+// typedef Pd5 ValvePower;     // PD5 выход вкл преобразователя напряжения
+// typedef Pd7 ValveDirection; // PD7 выход реверса - включения реле
+// typedef Pd2 Alarm;          // PD2 вход тревоги с Gidrolock
+// typedef Pd3 Button;         // PD3 кнопка управления
+// typedef Pd6 Zummer;         // PD6 подключение базы транзистора пьезоизлучателя
+// typedef Pb0 Led;            // Сигнальный светодиод - PB0
 // PC3 (ADC3) - датчик тока кранов
 // PC2 (ADC2) - напряжение батареи
 

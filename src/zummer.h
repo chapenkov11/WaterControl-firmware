@@ -1,18 +1,17 @@
 #ifndef zummer_h
 #define zummer_h
 
-// Макросы включения зуммера
-#define zummerOn() TIMSK |= (1 << TOIE0); // вкл. прерывание переполнения
-#define zummerOff()         \
-    TIMSK &= ~(1 << TOIE0); \
-    Zummer::Clear();
-// выкл. прерывание совпадения
+extern const int alarm[];
+extern const int battery_low[];
+extern const int button[];
+extern const int alarm_and_battery_low[];
+extern const int bip_1000[];
+extern const int bip_2000[];
 
-// Без зуммера
-//#define zummerOn() PORTD &= ~(1<<PORT_ZUMMER); // вкл. прерывание переполнения
-//#define zummerOff() PORTD &= ~(1<<PORT_ZUMMER); // выкл. прерывание совпадения
-
-void initTimer0();
-void stopTimer0();
+void zummerInit();
+void zummerStart();
+void zummerStop();
+void zummerRun(const int *pattern);
+bool zummerIsBusy();
 
 #endif

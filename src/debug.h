@@ -2,8 +2,7 @@
 #define debug_h
 
 #ifdef SERIAL_LOG_MAIN_ON
-
-#include "debug.cpp"
+#include <Arduino.h>
 
 void LOG_BEGIN();
 

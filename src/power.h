@@ -3,6 +3,8 @@
 
 #include <avr/io.h>
 
+extern bool lowBat; // заряд батареи, 1 - низкий
+
 uint16_t getVCC();
 
 #endif

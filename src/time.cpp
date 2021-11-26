@@ -1,8 +1,8 @@
 #include <avr/interrupt.h>
 #include "time.h"
 
-// Счетчик переполнений таймера Т2
-static volatile uint32_t overflowCount;
+uint32_t time = 0;                      // Системное время
+static volatile uint32_t overflowCount; // Счетчик переполнений таймера Т2
 
 ISR(TIMER2_OVF_vect)
 {

@@ -4,6 +4,7 @@
 #ifdef SERIAL_LOG_MAIN_ON
 
 #include <Arduino.h>
+#include "debug.h"
 
 /*
 #define LOG_BEGIN() Serial.begin(9600);

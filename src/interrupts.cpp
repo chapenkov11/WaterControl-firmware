@@ -2,6 +2,9 @@
 #include <avr/interrupt.h>
 #include "settings.h"
 #include "interrupts.h"
+#include "debug.h"
+
+volatile bool alarmFlag = 0; // 1 - тревога
 
 void INT0init()
 {
@@ -17,9 +20,4 @@ ISR(INT0_vect)
 #ifdef SERIAL_LOG_MAIN_ON
     LOG("Тревога");
 #endif
-}
-
-ISR(TIMER0_OVF_vect)
-{
-    Zummer::Toggle();
 }

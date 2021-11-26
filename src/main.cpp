@@ -18,16 +18,11 @@
 #include "time.h"
 
 // Глобальные переменные
-
-uint32_t time = 0; // Системное время
 uint32_t nextCheckBat = INTERVAL_CHECK_BAT, nextCheckValv = INTERVAL_CHECK_VALV, nextSignal = INTERVAL_SIGNAL, nextLed = INTERVAL_LED;
-bool valveFlag = CLOSE;      // целевое положение крана (в которое нужно перевести)
-bool valveStatus = OPEN;     // текущее положение крана
-bool lowBat = 0;             // заряд батареи, 1 - низкий
-volatile bool alarmFlag = 0; // 1 - тревога
 
 int main()
 {
+  SREG |= (1 << (SREG_I)); // глобально разрешить прерывания
 
   // DDRB = 0b00000001;
   // PORTB = 0b11111110; // неиспользуемые порты - вход с подтяжкоей к VCC, PB0 - выход светодиода
@@ -38,16 +33,15 @@ int main()
   // DDRC = 0b00000000;
   // PORTC = 0b11110011; // PC2, PC3 - вход без подтяжки
 
+  Led::SetDir(1);
+  Zummer::SetDir(1);
+
 #ifdef SERIAL_LOG_MAIN_ON
   LOG_BEGIN();
 #endif
-  Led::On(); // Вкл. сигнальный светодиод
-  initTimer0();
-  zummerOn();
+  zummerInit();
+  zummerRun(bip_2000);
   initSleepTimer();
-  zummerOff();
-  stopTimer0();
-  Led::Off();
   Adc::init(presc_128, ref_Vcc); //Делитель 128 = 64 кГц, VCC
   INT0init();
 
@@ -64,24 +58,19 @@ int main()
       {
         if ((alarmFlag == 0) && (lowBat == 0))
         {
-// Нормальный режим работы
-// Переключение крана
+          // Нормальный режим работы
+          // Переключение крана
+
 #ifdef SERIAL_LOG_MAIN_ON
           LOG("Кнопка: переключение");
 #endif
           valveFlag = !valveFlag;
-          // Звуковой сигнал
-          initTimer0();
-          zummerOn();
-          Led::On();
-          _delay_ms(200);
-          zummerOff();
-          Led::Off();
-          stopTimer0();
+          zummerRun(button);
         }
         else
         {
-// сброс тревоги
+          // сброс тревоги
+
 #ifdef SERIAL_LOG_MAIN_ON
           LOG("Кнопка: сброс тревоги");
 #endif
@@ -90,29 +79,11 @@ int main()
             valveFlag = CLOSE;
             alarmFlag = 0;
             GICR |= 1 << INT0; // вкл. INT0 прерывание
-            // Звуковой сигнал
-            initTimer0();
-            zummerOn();
-            Led::On();
-            _delay_ms(1000);
-            zummerOff();
-            Led::Off();
-            stopTimer0();
+            zummerRun(bip_1000);
           }
           if (lowBat == 1)
           {
-            // Звуковой сигнал
-            initTimer0();
-            for (uint8_t i = 2; i > 0; i--)
-            {
-              zummerOn();
-              Led::On();
-              _delay_ms(500);
-              zummerOff();
-              Led::Off();
-              _delay_ms(100);
-            }
-            stopTimer0();
+            zummerRun(battery_low);
           }
           nextSignal = time + 43200; // Отложить сигналы на сутки
         }
@@ -143,18 +114,7 @@ int main()
     {
       setValve(CLOSE);
       valveFlag = CLOSE;
-      // Звуковой сигнал
-      initTimer0();
-      for (uint8_t i = 3; i > 0; i--)
-      {
-        zummerOn();
-        Led::On();
-        _delay_ms(500);
-        zummerOff();
-        Led::Off();
-        _delay_ms(100);
-      }
-      stopTimer0();
+      zummerRun(alarm);
     }
 
     // Открытие крана
@@ -188,29 +148,16 @@ int main()
 #endif
       if (alarmFlag == 1)
       {
-        initTimer0();
-        for (uint8_t i = 3; i > 0; i--)
-        {
-          zummerOn();
-          _delay_ms(500);
-          zummerOff();
-          _delay_ms(100);
-        }
-        stopTimer0();
+        zummerRun(alarm);
       }
 
       if (lowBat == 1)
       {
-        _delay_ms(1000);
-        initTimer0();
-        for (uint8_t i = 2; i > 0; i--)
-        {
-          zummerOn();
-          _delay_ms(500);
-          zummerOff();
-          _delay_ms(100);
-        }
-        stopTimer0();
+        zummerRun(battery_low);
+      }
+      if (lowBat && alarmFlag)
+      {
+        zummerRun(alarm_and_battery_low);
       }
       nextSignal = time + INTERVAL_SIGNAL;
     }
@@ -259,7 +206,7 @@ int main()
 
 #ifndef SERIAL_LOG_MAIN_ON
     // Если все хорошо - уход в сон
-    if (valveFlag == valveStatus)
+    if (valveFlag == valveStatus && !(zummerIsBusy()))
     {
       // Засыпаем
       set_sleep_mode(SLEEP_MODE_PWR_SAVE);

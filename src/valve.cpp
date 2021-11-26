@@ -4,6 +4,10 @@
 #include "valve.h"
 #include "adc.h"
 #include "power.h"
+#include "debug.h"
+
+bool valveFlag = CLOSE;  // целевое положение крана (в которое нужно перевести)
+bool valveStatus = OPEN; // текущее положение крана
 
 // Выкл. краны
 void valveOff()

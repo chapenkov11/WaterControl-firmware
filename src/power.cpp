@@ -2,6 +2,9 @@
 #include "adc.h"
 #include "valve.h"
 #include "settings.h"
+#include "debug.h"
+
+bool lowBat = 0; // заряд батареи, 1 - низкий
 
 uint16_t getVCC()
 {
