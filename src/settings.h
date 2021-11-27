@@ -10,14 +10,21 @@
 
 // Для отладочной платы
 // Установка пинов МК
-typedef Pd5 ValvePower;     // PD5 выход вкл преобразователя напряжения
-typedef Pd7 ValveDirection; // PD7 выход реверса - включения реле
-typedef Pd2 Alarm;          // PD2 вход тревоги с Gidrolock
-typedef Pd3 Button;         // PD3 кнопка управления
-typedef Pb0 Zummer;         // PD6 подключение базы транзистора пьезоизлучателя
-typedef Pd4 Led;            // Сигнальный светодиод - PB0
-#define batAdc ADC2         // PC2 (ADC2) - напряжение батареи
-#define valvAdc ADC3        // PC3 (ADC3) - датчик тока кранов
+// Кран 1
+typedef Pd5 valve1_power;     // PD5 выход вкл преобразователя напряжения
+typedef Pd7 valve1_direction; // PD7 выход реверса - включения реле
+#define valve1_adc ADC3       // PC3 (ADC3) - датчик тока кранов
+// Кран 2
+typedef Pd6 valve2_power;     // PD5 выход вкл преобразователя напряжения
+typedef Pb3 valve2_direction; // PD7 выход реверса - включения реле
+#define valve2_adc ADC0       // PC3 (ADC3) - датчик тока кранов
+
+typedef Pd2 Alarm;   // PD2 вход тревоги с Gidrolock
+typedef Pd3 Button;  // PD3 кнопка управления
+typedef Pb0 Zummer;  // PD6 подключение базы транзистора пьезоизлучателя
+typedef Pd4 Led;     // Сигнальный светодиод - PB0
+#define batAdc ADC2  // PC2 (ADC2) - напряжение батареи
+#define valvAdc ADC3 // PC3 (ADC3) - датчик тока кранов
 
 // Установка пинов МК
 // typedef Pd5 ValvePower;     // PD5 выход вкл преобразователя напряжения

@@ -20,6 +20,9 @@
 uint32_t nextCheckBat = INTERVAL_CHECK_BAT, nextCheckValv = INTERVAL_CHECK_VALV, nextSignal = INTERVAL_SIGNAL, nextLed = INTERVAL_LED;
 // bool preventOn = 0;
 
+Valve<valve1_power, valve1_direction, valve1_adc> valve;
+// Valve<valve2_power, valve2_direction, valve2_adc> valve2;
+
 int main()
 {
   SREG |= (1 << (SREG_I)); // глобально разрешить прерывания
@@ -35,8 +38,8 @@ int main()
 
   Led::SetDir(1);
   Zummer::SetDir(1);
-  ValveDirection::SetDir(1);
-  ValvePower::SetDir(1);
+  // ValveDirection::SetDir(1);
+  // ValvePower::SetDir(1);
 
   LOG_BEGIN();
   zummerInit();
@@ -62,13 +65,13 @@ int main()
           // Переключение крана
 
           LOG("Кнопка: переключение");
-          if (valveGetPosition() == OPEN)
+          if (valve.getPosition() == OPEN)
           {
-            valveSetPosition(CLOSE);
+            valve.setPosition(CLOSE);
           }
           else
           {
-            valveSetPosition(OPEN);
+            valve.setPosition(OPEN);
           }
           zummerRun(button);
         }
@@ -99,23 +102,23 @@ int main()
       nextCheckBat = time + INTERVAL_CHECK_BAT;
     }
 
-    valveRun();
+    valve.run();
 
     // Профилактика закисания крана - закрыть-открыть
     if ((time >= nextCheckValv) && (alarmFlag == 0 || lowBat == 0))
     {
       LOG("Профилактика закисания");
 
-      if (valveGetPosition() == OPEN && valveGetStatus() != RUNNING)
+      if (valve.getPosition() == OPEN && valve.getStatus() != RUNNING)
       {
 
-        valveSetPosition(CLOSE);
+        valve.setPosition(CLOSE);
       }
 
-      if (valveGetPosition() == CLOSE && valveGetStatus() != RUNNING)
+      if (valve.getPosition() == CLOSE && valve.getStatus() != RUNNING)
       {
         // preventOn == 0;
-        valveSetPosition(OPEN);
+        valve.setPosition(OPEN);
         nextCheckValv = time + INTERVAL_CHECK_VALV;
       }
       nextCheckValv = time + INTERVAL_CHECK_VALV;
@@ -185,7 +188,7 @@ int main()
 
 #ifndef SERIAL_LOG_ON
     // Если краны и зуммер отработали - уход в сон
-    if (valveGetStatus() == DONE && !(zummerIsBusy()))
+    if (valve.getStatus() == DONE && !(zummerIsBusy()))
     {
       // Засыпаем
       set_sleep_mode(SLEEP_MODE_PWR_SAVE);

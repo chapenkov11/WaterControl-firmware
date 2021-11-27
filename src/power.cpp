@@ -5,24 +5,26 @@
 #include "debug.h"
 
 bool lowBat = 0; // заряд батареи, 1 - низкий
+extern Valve<valve1_power, valve1_direction, valve1_adc> valve;
 
 // TODO: измерение напряжения по подключаемому делителю
 uint16_t getVCC()
 {
     Adc::enable();
     Adc::setInput(batAdc);
-    if (valveCurrentPosition == OPEN)
+
+    if (valve.getPosition() == OPEN)
     {
-        valveOnOpen();
+        valve.onOpen();
     }
     else
     {
-        valveOnClose();
+        valve.onClose();
     }
     // Замеряем напряжение батареи
     uint16_t AVG = Adc::getAVGofN(50);
     // Выкл. преобзователь и реле
-    valveOff();
+    valve.off();
     Adc::disable();
     // Делитель 2000/1000 Om
     // r1 = 2000, r2 = 1000

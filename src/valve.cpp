@@ -1,78 +1,75 @@
 #include <util/delay.h>
 #include "settings.h"
 #include "sleepTimer.h"
-#include "valve.h"
 #include "adc.h"
 #include "power.h"
 #include "debug.h"
 #include "interrupts.h"
 #include "zummer.h"
-
-valvePosition valveGoalPosition = CLOSE;   // целевое положение крана (в которое нужно перевести)
-valvePosition valveCurrentPosition = OPEN; // =valveStatus // текущее положение крана
-valveStatus valveCurrentStatus = RUNNING;  // текущий статус крана
-uint16_t startSwitch;                      // время начала переключения крана
+#include "valve.hpp"
 
 // #define valveAdc ADC3
-
-// Стадия переключения крана
-enum vavlePeriod
+template <class PIN_POWER, class PIN_DIRECTION, uint8_t ADC_INPUT>
+Valve<PIN_POWER, PIN_DIRECTION, ADC_INPUT>::Valve()
 {
-    NORMAL,
-    PAUSE,
-    REVERS
-};
+    PIN_POWER::SetDir(1);
+    PIN_DIRECTION::SetDir(1);
+}
 
 // Устанавливает флаги для переключения крана в нужное положение
-void valveSetPosition(valvePosition position)
+template <class PIN_POWER, class PIN_DIRECTION, uint8_t ADC_INPUT>
+void Valve<PIN_POWER, PIN_DIRECTION, ADC_INPUT>::setPosition(valvePosition position)
 {
     LOG("Переключение крана");
-    if (valveCurrentStatus != RUNNING)
+    if (status != RUNNING)
     {
-        valveGoalPosition = position;
-        valveCurrentStatus = RUNNING;
+        goalPosition = position;
+        status = RUNNING;
         startSwitch = time;
     }
 }
 
 // Получить текущее положение крана
-valvePosition valveGetPosition()
+template <class PIN_POWER, class PIN_DIRECTION, uint8_t ADC_INPUT>
+valvePosition Valve<PIN_POWER, PIN_DIRECTION, ADC_INPUT>::getPosition()
 {
-    return valveCurrentPosition;
+    return currentPosition;
 }
 
 // Получить текущее состояние крана
-valveStatus valveGetStatus()
+template <class PIN_POWER, class PIN_DIRECTION, uint8_t ADC_INPUT>
+valveStatus Valve<PIN_POWER, PIN_DIRECTION, ADC_INPUT>::getStatus()
 {
-    return valveCurrentStatus;
+    return status;
 }
 
 /*
 Логика остановки крана 
 Проверяет состояние кранов и переводит в нужное
 */
-void valveRun()
+template <class PIN_POWER, class PIN_DIRECTION, uint8_t ADC_INPUT>
+void Valve<PIN_POWER, PIN_DIRECTION, ADC_INPUT>::run()
 {
     // Если краны не в состоянии переключения
-    if (valveCurrentStatus == DONE)
+    if (status == DONE)
     {
         // Закрытие крана
-        if (valveGoalPosition == CLOSE && valveCurrentPosition == OPEN)
+        if (goalPosition == CLOSE && currentPosition == OPEN)
         {
-            valveSetPosition(CLOSE);
+            setPosition(CLOSE);
         }
 
         // Закрытие крана по тревоге
-        if ((alarmFlag == 1 || lowBat == 1) && valveCurrentPosition == OPEN)
+        if ((alarmFlag == 1 || lowBat == 1) && currentPosition == OPEN)
         {
-            valveSetPosition(CLOSE);
+            setPosition(CLOSE);
             zummerRun(alarm);
         }
 
         // Открытие крана по кнопке
-        if (valveGoalPosition == OPEN && valveCurrentPosition == CLOSE && (alarmFlag == 0 || lowBat == 0))
+        if (goalPosition == OPEN && currentPosition == CLOSE && (alarmFlag == 0 || lowBat == 0))
         {
-            valveSetPosition(OPEN);
+            setPosition(OPEN);
         }
     }
     else
@@ -85,7 +82,7 @@ void valveRun()
         LOG("Переключение крана");
         Adc::enable();
         Adc::setInput(valvAdc);
-        static vavlePeriod period = NORMAL;
+        static valvePeriod period = NORMAL;
         static uint8_t count = DONE_NUMBER; // кран считается остановившимся, когда получено столько статусов DONE при измерении тока крана
 
         /*
@@ -107,13 +104,13 @@ void valveRun()
             period = NORMAL;
             count = DONE_NUMBER;
             // включаем двигатель
-            if (valveGoalPosition == OPEN)
+            if (goalPosition == OPEN)
             {
-                valveOnOpen(); // Направление - реверс
+                onOpen(); // Направление - реверс
             }
             else
             {
-                valveOnClose();
+                onClose();
             }
         }
         else if (N >= MAX_SWITCH_TIME && N < PAUSE_TIME && period != PAUSE)
@@ -121,7 +118,7 @@ void valveRun()
             // Стадия 2: пауза
             LOG("Стадия 2: пауза")
             period = PAUSE;
-            valveOff();
+            off();
         }
         else
         {
@@ -129,15 +126,15 @@ void valveRun()
             LOG("Стадия 3: противозаклинивающий маневр");
             period = REVERS;
             // реверсируем двигатель крана
-            if (valveGoalPosition == OPEN)
+            if (goalPosition == OPEN)
             {
-                valveOff();
-                valveOnClose();
+                off();
+                onClose();
             }
             else
             {
-                valveOff();
-                valveOnOpen();
+                off();
+                onOpen();
             }
         }
 
@@ -151,20 +148,20 @@ void valveRun()
         {
             LOG("Измерение батареи");
             getVCC();
-            if (valveGoalPosition == OPEN)
+            if (goalPosition == OPEN)
             {
-                valveCurrentPosition = OPEN;
-                valveCurrentStatus = DONE;
+                currentPosition = OPEN;
+                status = DONE;
                 LOG("Кран открыт");
             }
             else
             {
-                valveCurrentPosition = CLOSE;
-                valveCurrentStatus = DONE;
+                currentPosition = CLOSE;
+                status = DONE;
                 LOG("Кран закрыт");
             }
             Adc::disable();
-            valveOff();
+            off();
             nextCheckValv = time + INTERVAL_CHECK_VALV; // отложить проверку на закисание
             nextCheckBat = time + INTERVAL_CHECK_BAT;   // отложить проверку батареи
             period = NORMAL;
@@ -187,31 +184,41 @@ void valveRun()
 // }
 
 // Выкл. краны
-void valveOff()
+template <class PIN_POWER, class PIN_DIRECTION, uint8_t ADC_INPUT>
+void Valve<PIN_POWER, PIN_DIRECTION, ADC_INPUT>::off()
 {
-    ValvePower::Off(); // выкл. преобразователь
+    PIN_POWER::Off(); // выкл. преобразователь
+    // ValvePower::Off();
     _delay_ms(RELEY_INTERVAL);
-    ValveDirection::Off(); // выкл. реверс
+    PIN_DIRECTION::Off(); // выкл. реверс
+    // ValveDirection::Off();
     _delay_ms(RELEY_INTERVAL);
 }
 
 // Вкл. краны в прямом направлении
-void valveOnClose()
+template <class PIN_POWER, class PIN_DIRECTION, uint8_t ADC_INPUT>
+void Valve<PIN_POWER, PIN_DIRECTION, ADC_INPUT>::onClose()
 {
-    ValveDirection::Off(); // выкл. реверс
+    // ValveDirection::Off();
+    PIN_DIRECTION::Off(); // выкл. реверс
     _delay_ms(RELEY_INTERVAL);
-    ValvePower::On(); // вкл. преобразователь
+    // ValvePower::On();
+    PIN_POWER::On(); // вкл. преобразователь
 }
 
 // Вкл. краны в обратном направлении
-void valveOnOpen()
+template <class PIN_POWER, class PIN_DIRECTION, uint8_t ADC_INPUT>
+void Valve<PIN_POWER, PIN_DIRECTION, ADC_INPUT>::onOpen()
 {
-    ValveDirection::On(); // вкл. реверс
+    // ValveDirection::On();
+    PIN_DIRECTION::On(); // вкл. реверс
     _delay_ms(RELEY_INTERVAL);
-    ValvePower::On(); // вкл. преобразователь
+    // ValvePower::On();
+    PIN_POWER::On(); // вкл. преобразователь
 }
 
-valveStatus getValveStatus()
+template <class PIN_POWER, class PIN_DIRECTION, uint8_t ADC_INPUT>
+valveStatus Valve<PIN_POWER, PIN_DIRECTION, ADC_INPUT>::getValveStatus()
 {
     Adc::setInput(valvAdc);
     uint16_t ADCavg = Adc::getAVGofN(AVG_NUMBER);
