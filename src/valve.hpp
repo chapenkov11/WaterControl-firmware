@@ -2,6 +2,7 @@
 #define valve_hpp
 
 #include <stdio.h>
+#include "adc.h"
 
 // Возможное положение крана
 enum valvePosition
@@ -34,7 +35,7 @@ extern uint32_t time;
 - пин включения реверса (управление H-мостом)
 - вход АЦП для измерения тока
 */
-template <class PIN_POWER, class PIN_DIRECTION, uint8_t ADC_INPUT>
+template <class PIN_POWER, class PIN_DIRECTION, ADCinput ADC_INPUT>
 class Valve
 {
 private:

@@ -9,7 +9,7 @@
 #include "valve.hpp"
 
 // #define valveAdc ADC3
-template <class PIN_POWER, class PIN_DIRECTION, uint8_t ADC_INPUT>
+template <class PIN_POWER, class PIN_DIRECTION, ADCinput ADC_INPUT>
 Valve<PIN_POWER, PIN_DIRECTION, ADC_INPUT>::Valve()
 {
     PIN_POWER::SetDir(1);
@@ -17,7 +17,7 @@ Valve<PIN_POWER, PIN_DIRECTION, ADC_INPUT>::Valve()
 }
 
 // Устанавливает флаги для переключения крана в нужное положение
-template <class PIN_POWER, class PIN_DIRECTION, uint8_t ADC_INPUT>
+template <class PIN_POWER, class PIN_DIRECTION, ADCinput ADC_INPUT>
 void Valve<PIN_POWER, PIN_DIRECTION, ADC_INPUT>::setPosition(valvePosition position)
 {
     LOG("Переключение крана");
@@ -30,14 +30,14 @@ void Valve<PIN_POWER, PIN_DIRECTION, ADC_INPUT>::setPosition(valvePosition posit
 }
 
 // Получить текущее положение крана
-template <class PIN_POWER, class PIN_DIRECTION, uint8_t ADC_INPUT>
+template <class PIN_POWER, class PIN_DIRECTION, ADCinput ADC_INPUT>
 valvePosition Valve<PIN_POWER, PIN_DIRECTION, ADC_INPUT>::getPosition()
 {
     return currentPosition;
 }
 
 // Получить текущее состояние крана
-template <class PIN_POWER, class PIN_DIRECTION, uint8_t ADC_INPUT>
+template <class PIN_POWER, class PIN_DIRECTION, ADCinput ADC_INPUT>
 valveStatus Valve<PIN_POWER, PIN_DIRECTION, ADC_INPUT>::getStatus()
 {
     return status;
@@ -47,7 +47,7 @@ valveStatus Valve<PIN_POWER, PIN_DIRECTION, ADC_INPUT>::getStatus()
 Логика остановки крана 
 Проверяет состояние кранов и переводит в нужное
 */
-template <class PIN_POWER, class PIN_DIRECTION, uint8_t ADC_INPUT>
+template <class PIN_POWER, class PIN_DIRECTION, ADCinput ADC_INPUT>
 void Valve<PIN_POWER, PIN_DIRECTION, ADC_INPUT>::run()
 {
     // Если краны не в состоянии переключения
@@ -81,7 +81,7 @@ void Valve<PIN_POWER, PIN_DIRECTION, ADC_INPUT>::run()
         */
         LOG("Переключение крана");
         Adc::enable();
-        Adc::setInput(valvAdc);
+        Adc::setInput(ADC_INPUT);
         static valvePeriod period = NORMAL;
         static uint8_t count = DONE_NUMBER; // кран считается остановившимся, когда получено столько статусов DONE при измерении тока крана
 
@@ -184,7 +184,7 @@ void Valve<PIN_POWER, PIN_DIRECTION, ADC_INPUT>::run()
 // }
 
 // Выкл. краны
-template <class PIN_POWER, class PIN_DIRECTION, uint8_t ADC_INPUT>
+template <class PIN_POWER, class PIN_DIRECTION, ADCinput ADC_INPUT>
 void Valve<PIN_POWER, PIN_DIRECTION, ADC_INPUT>::off()
 {
     PIN_POWER::Off(); // выкл. преобразователь
@@ -196,7 +196,7 @@ void Valve<PIN_POWER, PIN_DIRECTION, ADC_INPUT>::off()
 }
 
 // Вкл. краны в прямом направлении
-template <class PIN_POWER, class PIN_DIRECTION, uint8_t ADC_INPUT>
+template <class PIN_POWER, class PIN_DIRECTION, ADCinput ADC_INPUT>
 void Valve<PIN_POWER, PIN_DIRECTION, ADC_INPUT>::onClose()
 {
     // ValveDirection::Off();
@@ -207,7 +207,7 @@ void Valve<PIN_POWER, PIN_DIRECTION, ADC_INPUT>::onClose()
 }
 
 // Вкл. краны в обратном направлении
-template <class PIN_POWER, class PIN_DIRECTION, uint8_t ADC_INPUT>
+template <class PIN_POWER, class PIN_DIRECTION, ADCinput ADC_INPUT>
 void Valve<PIN_POWER, PIN_DIRECTION, ADC_INPUT>::onOpen()
 {
     // ValveDirection::On();
@@ -217,10 +217,10 @@ void Valve<PIN_POWER, PIN_DIRECTION, ADC_INPUT>::onOpen()
     PIN_POWER::On(); // вкл. преобразователь
 }
 
-template <class PIN_POWER, class PIN_DIRECTION, uint8_t ADC_INPUT>
+template <class PIN_POWER, class PIN_DIRECTION, ADCinput ADC_INPUT>
 valveStatus Valve<PIN_POWER, PIN_DIRECTION, ADC_INPUT>::getValveStatus()
 {
-    Adc::setInput(valvAdc);
+    Adc::setInput(ADC_INPUT);
     uint16_t ADCavg = Adc::getAVGofN(AVG_NUMBER);
     if (ADCavg <= 1)
     {
