@@ -5,10 +5,11 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include <avr/interrupt.h>
+#include <gpio.h>
 #include "settings.h"
 #include "debug.cpp"
 #include "sleepTimer.h"
-#include "gpio.h"
+
 #include "adc.h"
 #include "valve.h"
 #include "power.h"

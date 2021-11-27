@@ -21,7 +21,7 @@
                 "C:/Users/chapenkov11/.platformio/packages/framework-arduino-avr-minicore/libraries/Wire/src",
                 "C:/Users/chapenkov11/.platformio/packages/framework-arduino-avr-minicore/libraries/Wire1/src",
                 "C:/Users/chapenkov11/.platformio/packages/tool-unity",
-                ""
+                "${workspaceFolder}/**"
             ],
             "browse": {
                 "limitSymbolsToIncludedHeaders": true,
@@ -38,8 +38,7 @@
                     "C:/Users/chapenkov11/.platformio/packages/framework-arduino-avr-minicore/libraries/SoftwareSerial/src",
                     "C:/Users/chapenkov11/.platformio/packages/framework-arduino-avr-minicore/libraries/Wire/src",
                     "C:/Users/chapenkov11/.platformio/packages/framework-arduino-avr-minicore/libraries/Wire1/src",
-                    "C:/Users/chapenkov11/.platformio/packages/tool-unity",
-                    ""
+                    "C:/Users/chapenkov11/.platformio/packages/tool-unity"
                 ]
             },
             "defines": [
@@ -48,16 +47,30 @@
                 "F_CPU=1000000L",
                 "ARDUINO_ARCH_AVR",
                 "ARDUINO=10808",
-                "__AVR_ATmega8__",
-                ""
+                "__AVR_ATmega8__"
             ],
             "cStandard": "c11",
             "cppStandard": "c++11",
             "compilerPath": "C:/Users/chapenkov11/.platformio/packages/toolchain-atmelavr/bin/avr-gcc.exe",
             "compilerArgs": [
-                "-mmcu=atmega8",
-                ""
-            ]
+                "-mmcu=atmega8"
+            ],
+            "mergeConfigurations": false
+        },
+        {
+            "name": "fffff",
+            "includePath": [
+                "${workspaceFolder}/**"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "compilerPath": "C:\\MinGW\\bin\\gcc.exe",
+            "cStandard": "gnu11",
+            "cppStandard": "gnu++14",
+            "intelliSenseMode": "windows-gcc-x86"
         }
     ],
     "version": 4
