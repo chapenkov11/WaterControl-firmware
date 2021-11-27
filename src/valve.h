@@ -1,20 +1,37 @@
 #ifndef valve_h
 #define valve_h
 
-// Положение крана
-#define CLOSE 0
-#define OPEN 1
+// // Положение крана
+// #define CLOSE 0
+// #define OPEN 1
+// Возможное положение крана
+enum valvePosition
+{
+    CLOSE,
+    OPEN
+};
 
-extern bool valveFlag;   // целевое положение крана (в которое нужно перевести)
-extern bool valveStatus; // текущее положение крана
+enum valveStatus
+{
+    RUNNING,
+    DONE
+};
+
+extern valvePosition valveGoalPosition;    // целевое положение крана (в которое нужно перевести)
+extern valvePosition valveCurrentPosition; // текущее положение крана
+extern valveStatus valveCurrentStatus;     // текущий статус крана
 extern bool lowBat;
 extern uint32_t nextCheckBat, nextCheckValv, nextSignal, nextLed;
 extern uint32_t time;
 
-void setValve(bool status);
-bool getValveStatus();
+// void setValve(valvePosition position);
+valveStatus getValveStatus();
 void valveOff();
-void valveOnDirect();
-void valveOnRevers();
+void valveOnClose();
+void valveOnOpen();
+void valveRun();
+void valveSetPosition(valvePosition position);
+valvePosition valveGetPosition();
+void valvePrevention();
 
 #endif

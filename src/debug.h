@@ -1,12 +1,27 @@
 #ifndef debug_h
 #define debug_h
 
-#ifdef SERIAL_LOG_MAIN_ON
+#include <stdint.h>
+
+extern uint32_t time;
+
+#ifndef SERIAL_LOG_ON
+
+#define LOG(x)
+#define LOG_BEGIN()
+
+#else
 #include <Arduino.h>
+#undef LOG
+#undef LOG_BEGIN
 
-void LOG_BEGIN();
+#define LOG_BEGIN() Serial.begin(9600);
 
-void LOG(String msg);
+#define LOG(x)             \
+    Serial.print(time);    \
+    Serial.print(F(": ")); \
+    Serial.println(F(x));
 
 #endif
+
 #endif

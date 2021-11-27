@@ -36,13 +36,11 @@ int main()
   Led::SetDir(1);
   Zummer::SetDir(1);
 
-#ifdef SERIAL_LOG_MAIN_ON
   LOG_BEGIN();
-#endif
   zummerInit();
   zummerRun(bip_2000);
   initSleepTimer();
-  Adc::init(presc_128, ref_Vcc); //Делитель 128 = 64 кГц, VCC
+  Adc::init(presc_128, ref_Vcc); //Делитель 128 = 64 кГц, опора на VCC
   INT0init();
 
   // Главный цикл
@@ -61,22 +59,25 @@ int main()
           // Нормальный режим работы
           // Переключение крана
 
-#ifdef SERIAL_LOG_MAIN_ON
           LOG("Кнопка: переключение");
-#endif
-          valveFlag = !valveFlag;
+          if (valveGetPosition() == OPEN)
+          {
+            valveSetPosition(CLOSE);
+          }
+          else
+          {
+            valveSetPosition(OPEN);
+          }
           zummerRun(button);
         }
         else
         {
           // сброс тревоги
 
-#ifdef SERIAL_LOG_MAIN_ON
           LOG("Кнопка: сброс тревоги");
-#endif
           if (alarmFlag == 1)
           {
-            valveFlag = CLOSE;
+            valveGoalPosition = CLOSE;
             alarmFlag = 0;
             GICR |= 1 << INT0; // вкл. INT0 прерывание
             zummerRun(bip_1000);
@@ -93,9 +94,7 @@ int main()
     // Проверка напряжения батареи
     if (time >= nextCheckBat)
     {
-#ifdef SERIAL_LOG_MAIN_ON
       LOG("Проверка напряжения батареи");
-#endif
       if (getVCC() <= MIN_BAT_LEVEL)
       {
         lowBat = 1;
@@ -103,49 +102,47 @@ int main()
       nextCheckBat = time + INTERVAL_CHECK_BAT;
     }
 
-    // Закрытие крана
-    if (valveFlag == CLOSE && valveStatus == OPEN)
-    {
-      setValve(CLOSE);
-    }
+    valveRun();
+    // // Закрытие крана
+    // if (valveFlag == CLOSE && valveStatus == OPEN)
+    // {
+    //   setValve(CLOSE);
+    // }
 
-    // Закрытие крана по тревоге
-    if ((alarmFlag == 1 || lowBat == 1) && valveStatus == OPEN)
-    {
-      setValve(CLOSE);
-      valveFlag = CLOSE;
-      zummerRun(alarm);
-    }
+    // // Закрытие крана по тревоге
+    // if ((alarmFlag == 1 || lowBat == 1) && valveStatus == OPEN)
+    // {
+    //   setValve(CLOSE);
+    //   valveFlag = CLOSE;
+    //   zummerRun(alarm);
+    // }
 
-    // Открытие крана
-    if (valveFlag == OPEN && valveStatus == CLOSE && (alarmFlag == 0 || lowBat == 0))
-    {
-      setValve(OPEN);
-    }
+    // // Открытие крана
+    // if (valveFlag == OPEN && valveStatus == CLOSE && (alarmFlag == 0 || lowBat == 0))
+    // {
+    //   setValve(OPEN);
+    // }
 
     // Профилактика закисания крана - закрыть-открыть
     if ((time >= nextCheckValv) && (alarmFlag == 0 || lowBat == 0))
     {
-#ifdef SERIAL_LOG_MAIN_ON
       LOG("Профилактика закисания");
-#endif
-      if (valveStatus == OPEN)
-      {
-        setValve(CLOSE);
-        if (lowBat == 0)
-        {
-          setValve(OPEN);
-        }
-      }
+      valvePrevention();
+      // if (valveStatus == OPEN)
+      // {
+      //   setValve(CLOSE);
+      //   if (lowBat == 0)
+      //   {
+      //     setValve(OPEN);
+      //   }
+      // }
       nextCheckValv = time + INTERVAL_CHECK_VALV;
     }
 
     // Звуковая сигнализация при тревоге и низком заряде батареи
     if (time >= nextSignal)
     {
-#ifdef SERIAL_LOG_MAIN_ON
       LOG("Сигнал");
-#endif
       if (alarmFlag == 1)
       {
         zummerRun(alarm);
@@ -198,15 +195,16 @@ int main()
       nextLed = time + INTERVAL_LED;
     }
 
-#ifdef SERIAL_LOG_MAIN_ON
+#ifdef SERIAL_LOG_ON
     Led::On();
     _delay_ms(2000);
     Led::Off();
 #endif
 
-#ifndef SERIAL_LOG_MAIN_ON
+#ifndef SERIAL_LOG_ON
     // Если все хорошо - уход в сон
-    if (valveFlag == valveStatus && !(zummerIsBusy()))
+    // if (valveGoalPosition == valveCurrentPosition && !(zummerIsBusy()))
+    if (valveCurrentStatus == DONE && !(zummerIsBusy()))
     {
       // Засыпаем
       set_sleep_mode(SLEEP_MODE_PWR_SAVE);

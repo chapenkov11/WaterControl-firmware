@@ -1,11 +1,7 @@
-#ifndef DEBUG_CPP
-#define DEBUG_CPP
-
-#ifdef SERIAL_LOG_MAIN_ON
-
-#include <Arduino.h>
 #include "debug.h"
 
+// #define LOG(x) print(x)
+// #define LOG_BEGIN() begin()
 /*
 #define LOG_BEGIN() Serial.begin(9600);
 
@@ -16,17 +12,11 @@
     Serial.println(x);
 */
 
-void LOG_BEGIN()
-{
-    Serial.begin(9600);
-}
+// void begin() { Serial.begin(9600); }
 
-void LOG(String msg)
-{
-    // Serial.print(mainTimer);
-    Serial.print(": ");
-    Serial.println(msg);
-}
-
-#endif
-#endif
+// void print(String msg)
+// {
+//     // Serial.print(mainTimer);
+//     Serial.print(": ");
+//     Serial.println(msg);
+// }

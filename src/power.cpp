@@ -6,17 +6,18 @@
 
 bool lowBat = 0; // заряд батареи, 1 - низкий
 
+// TODO: измерение напряжения по подключаемому делителю
 uint16_t getVCC()
 {
     Adc::enable();
-    Adc::setInput(ADC2);
-    if (valveStatus == OPEN)
+    Adc::setInput(batAdc);
+    if (valveCurrentPosition == OPEN)
     {
-        valveOnRevers();
+        valveOnOpen();
     }
     else
     {
-        valveOnDirect();
+        valveOnClose();
     }
     // Замеряем напряжение батареи
     uint16_t AVG = Adc::getAVGofN(50);
@@ -32,6 +33,10 @@ uint16_t getVCC()
     // VCC = Vref*ADCavg*(3/1024)
 
     uint16_t volt = round((VREF * AVG * 3) / 1024);
+    if (volt <= MIN_BAT_LEVEL)
+    {
+        lowBat = 1;
+    }
 
 #ifdef SERIAL_LOG_MAIN_ON
     Serial.print("Напряжение батареи: ");

@@ -17,7 +17,5 @@ ISR(INT0_vect)
 {
     alarmFlag = 1;
     GICR &= ~(1 << INT0); // выкл. INT0
-#ifdef SERIAL_LOG_MAIN_ON
     LOG("Тревога");
-#endif
 }
