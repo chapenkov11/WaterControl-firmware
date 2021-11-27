@@ -1,4 +1,3 @@
-//#include <avr/pgmspace.h>
 //#include <Wire.h>
 //#include <avr/wdt.h>
 #include <avr/sleep.h>
@@ -19,6 +18,7 @@
 
 // Глобальные переменные
 uint32_t nextCheckBat = INTERVAL_CHECK_BAT, nextCheckValv = INTERVAL_CHECK_VALV, nextSignal = INTERVAL_SIGNAL, nextLed = INTERVAL_LED;
+// bool preventOn = 0;
 
 int main()
 {
@@ -35,6 +35,8 @@ int main()
 
   Led::SetDir(1);
   Zummer::SetDir(1);
+  ValveDirection::SetDir(1);
+  ValvePower::SetDir(1);
 
   LOG_BEGIN();
   zummerInit();
@@ -72,12 +74,10 @@ int main()
         }
         else
         {
-          // сброс тревоги
-
+          // сброс тревоги и отложить на сутки сигнал низкого заряда батареи
           LOG("Кнопка: сброс тревоги");
           if (alarmFlag == 1)
           {
-            valveGoalPosition = CLOSE;
             alarmFlag = 0;
             GICR |= 1 << INT0; // вкл. INT0 прерывание
             zummerRun(bip_1000);
@@ -95,47 +95,29 @@ int main()
     if (time >= nextCheckBat)
     {
       LOG("Проверка напряжения батареи");
-      if (getVCC() <= MIN_BAT_LEVEL)
-      {
-        lowBat = 1;
-      }
+      getVCC();
       nextCheckBat = time + INTERVAL_CHECK_BAT;
     }
 
     valveRun();
-    // // Закрытие крана
-    // if (valveFlag == CLOSE && valveStatus == OPEN)
-    // {
-    //   setValve(CLOSE);
-    // }
-
-    // // Закрытие крана по тревоге
-    // if ((alarmFlag == 1 || lowBat == 1) && valveStatus == OPEN)
-    // {
-    //   setValve(CLOSE);
-    //   valveFlag = CLOSE;
-    //   zummerRun(alarm);
-    // }
-
-    // // Открытие крана
-    // if (valveFlag == OPEN && valveStatus == CLOSE && (alarmFlag == 0 || lowBat == 0))
-    // {
-    //   setValve(OPEN);
-    // }
 
     // Профилактика закисания крана - закрыть-открыть
     if ((time >= nextCheckValv) && (alarmFlag == 0 || lowBat == 0))
     {
       LOG("Профилактика закисания");
-      valvePrevention();
-      // if (valveStatus == OPEN)
-      // {
-      //   setValve(CLOSE);
-      //   if (lowBat == 0)
-      //   {
-      //     setValve(OPEN);
-      //   }
-      // }
+
+      if (valveGetPosition() == OPEN && valveGetStatus() != RUNNING)
+      {
+
+        valveSetPosition(CLOSE);
+      }
+
+      if (valveGetPosition() == CLOSE && valveGetStatus() != RUNNING)
+      {
+        // preventOn == 0;
+        valveSetPosition(OPEN);
+        nextCheckValv = time + INTERVAL_CHECK_VALV;
+      }
       nextCheckValv = time + INTERVAL_CHECK_VALV;
     }
 
@@ -202,9 +184,8 @@ int main()
 #endif
 
 #ifndef SERIAL_LOG_ON
-    // Если все хорошо - уход в сон
-    // if (valveGoalPosition == valveCurrentPosition && !(zummerIsBusy()))
-    if (valveCurrentStatus == DONE && !(zummerIsBusy()))
+    // Если краны и зуммер отработали - уход в сон
+    if (valveGetStatus() == DONE && !(zummerIsBusy()))
     {
       // Засыпаем
       set_sleep_mode(SLEEP_MODE_PWR_SAVE);

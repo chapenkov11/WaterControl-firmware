@@ -1,9 +1,6 @@
 #ifndef valve_h
 #define valve_h
 
-// // Положение крана
-// #define CLOSE 0
-// #define OPEN 1
 // Возможное положение крана
 enum valvePosition
 {
@@ -11,6 +8,7 @@ enum valvePosition
     OPEN
 };
 
+// Возможные статусы крана (RUNNING - в процессе переключения, DONE - не переключается)
 enum valveStatus
 {
     RUNNING,
@@ -32,6 +30,6 @@ void valveOnOpen();
 void valveRun();
 void valveSetPosition(valvePosition position);
 valvePosition valveGetPosition();
-void valvePrevention();
+valveStatus valveGetStatus();
 
 #endif

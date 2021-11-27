@@ -35,10 +35,16 @@ void valveSetPosition(valvePosition position)
     }
 }
 
-// Получить текущее состояние крана
+// Получить текущее положение крана
 valvePosition valveGetPosition()
 {
     return valveCurrentPosition;
+}
+
+// Получить текущее состояние крана
+valveStatus valveGetStatus()
+{
+    return valveCurrentStatus;
 }
 
 /*
@@ -168,17 +174,17 @@ void valveRun()
 
 // профилактика закисания
 // TODO: доделать профилактику заклинивания
-void valvePrevention()
-{
-    if (valveCurrentPosition == OPEN)
-    {
-        valveSetPosition(CLOSE);
-        if (lowBat == 0)
-        {
-            valveSetPosition(OPEN);
-        }
-    }
-}
+// void valvePrevention()
+// {
+//     if (valveCurrentPosition == OPEN)
+//     {
+//         valveSetPosition(CLOSE);
+//         if (lowBat == 0)
+//         {
+//             valveSetPosition(OPEN);
+//         }
+//     }
+// }
 
 // Выкл. краны
 void valveOff()
