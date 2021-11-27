@@ -37,7 +37,7 @@ typedef Pd4 Led;    // Сигнальный светодиод - PB0
 
 // DEBUG
 // #define SERIAL_LOG_ON // лог всех действий в UART, в спящий режим не уходит
-#define DEBUG_INTERVAL // короткие интервалы для проверки функций
+// #define DEBUG_INTERVAL // короткие интервалы для проверки функций
 
 // Интервалы времени
 #ifndef DEBUG_INTERVAL

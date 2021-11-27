@@ -18,7 +18,7 @@ Valve<PIN_POWER, PIN_DIRECTION, ADC_INPUT>::Valve()
 
 // Устанавливает флаги для переключения крана в нужное положение
 template <class PIN_POWER, class PIN_DIRECTION, ADCinput ADC_INPUT>
-void Valve<PIN_POWER, PIN_DIRECTION, ADC_INPUT>::setPosition(valvePosition position)
+void Valve<PIN_POWER, PIN_DIRECTION, ADC_INPUT>::setPosition(ValvePosition position)
 {
     LOG("Переключение крана");
     if (status != RUNNING)
@@ -31,14 +31,14 @@ void Valve<PIN_POWER, PIN_DIRECTION, ADC_INPUT>::setPosition(valvePosition posit
 
 // Получить текущее положение крана
 template <class PIN_POWER, class PIN_DIRECTION, ADCinput ADC_INPUT>
-valvePosition Valve<PIN_POWER, PIN_DIRECTION, ADC_INPUT>::getPosition()
+ValvePosition Valve<PIN_POWER, PIN_DIRECTION, ADC_INPUT>::getPosition()
 {
     return currentPosition;
 }
 
 // Получить текущее состояние крана
 template <class PIN_POWER, class PIN_DIRECTION, ADCinput ADC_INPUT>
-valveStatus Valve<PIN_POWER, PIN_DIRECTION, ADC_INPUT>::getStatus()
+ValveStatus Valve<PIN_POWER, PIN_DIRECTION, ADC_INPUT>::getStatus()
 {
     return status;
 }
@@ -82,7 +82,7 @@ void Valve<PIN_POWER, PIN_DIRECTION, ADC_INPUT>::run()
         LOG("Переключение крана");
         Adc::enable();
         Adc::setInput(ADC_INPUT);
-        static valvePeriod period = NORMAL;
+        static ValvePeriod period = NORMAL;
         static uint8_t count = DONE_NUMBER; // кран считается остановившимся, когда получено столько статусов DONE при измерении тока крана
 
         /*
@@ -169,20 +169,6 @@ void Valve<PIN_POWER, PIN_DIRECTION, ADC_INPUT>::run()
     }
 }
 
-// профилактика закисания
-// TODO: доделать профилактику заклинивания
-// void valvePrevention()
-// {
-//     if (valveCurrentPosition == OPEN)
-//     {
-//         valveSetPosition(CLOSE);
-//         if (lowBat == 0)
-//         {
-//             valveSetPosition(OPEN);
-//         }
-//     }
-// }
-
 // Выкл. краны
 template <class PIN_POWER, class PIN_DIRECTION, ADCinput ADC_INPUT>
 void Valve<PIN_POWER, PIN_DIRECTION, ADC_INPUT>::off()
@@ -218,7 +204,7 @@ void Valve<PIN_POWER, PIN_DIRECTION, ADC_INPUT>::onOpen()
 }
 
 template <class PIN_POWER, class PIN_DIRECTION, ADCinput ADC_INPUT>
-valveStatus Valve<PIN_POWER, PIN_DIRECTION, ADC_INPUT>::getValveStatus()
+ValveStatus Valve<PIN_POWER, PIN_DIRECTION, ADC_INPUT>::getValveStatus()
 {
     Adc::setInput(ADC_INPUT);
     uint16_t ADCavg = Adc::getAVGofN(AVG_NUMBER);

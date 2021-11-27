@@ -5,21 +5,21 @@
 #include "adc.h"
 
 // Возможное положение крана
-enum valvePosition
+enum ValvePosition : bool
 {
     CLOSE,
     OPEN
 };
 
 // Возможные статусы крана (RUNNING - в процессе переключения, DONE - не переключается)
-enum valveStatus
+enum ValveStatus : bool
 {
     RUNNING,
     DONE
 };
 
 // Стадия переключения крана
-enum valvePeriod
+enum ValvePeriod : uint8_t
 {
     NORMAL,
     PAUSE,
@@ -39,19 +39,19 @@ template <class PIN_POWER, class PIN_DIRECTION, ADCinput ADC_INPUT>
 class Valve
 {
 private:
-    valvePosition goalPosition = CLOSE;   // целевое положение крана (в которое нужно перевести)
-    valvePosition currentPosition = OPEN; // текущее положение крана
-    valveStatus status = RUNNING;         // текущий статус крана
-    valveStatus getValveStatus();         // измерить ток крана и определить состояние крана
+    ValvePosition goalPosition = CLOSE;   // целевое положение крана (в которое нужно перевести)
+    ValvePosition currentPosition = OPEN; // текущее положение крана
+    ValveStatus status = RUNNING;         // текущий статус крана
+    ValveStatus getValveStatus();         // измерить ток крана и определить состояние крана
 
     uint16_t startSwitch; // время начала переключения крана
 
 public:
     Valve();
     void run();
-    void setPosition(valvePosition position);
-    valvePosition getPosition();
-    valveStatus getStatus();
+    void setPosition(ValvePosition position);
+    ValvePosition getPosition();
+    ValveStatus getStatus();
     void off(); // управление питанием мотора и реверсом
     void onClose();
     void onOpen();
