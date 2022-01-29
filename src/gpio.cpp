@@ -138,7 +138,7 @@ public:
     {
         PORT::DirSet(1 << PIN);
     }
-    static uint8_t IsSet()
+    static bool IsSet()
     {
         return PORT::PinRead() & (uint8_t)(1 << PIN);
     }

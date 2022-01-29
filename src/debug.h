@@ -8,7 +8,7 @@ extern uint32_t time;
 #ifndef SERIAL_LOG_ON
 
 #define LOG(x)
-#define LOG_BEGIN()
+#define LOG_BEGIN(x)
 
 #else
 #include <Arduino.h>
@@ -20,7 +20,7 @@ extern uint32_t time;
 #define LOG(x)             \
     Serial.print(time);    \
     Serial.print(F(": ")); \
-    Serial.println(F(x));
+    Serial.println(x);
 
 #endif
 

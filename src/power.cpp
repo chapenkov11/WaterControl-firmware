@@ -5,7 +5,7 @@
 #include "debug.h"
 
 bool lowBat = 0; // заряд батареи, 1 - низкий
-extern Valve<valve1_power, valve1_direction, valve1_adc> valve;
+extern Valve<valve1_power, valve1_driver_in_1, valve1_driver_in_2, valve1_adc> valve;
 
 // TODO: измерение напряжения по подключаемому делителю
 uint16_t getVCC()
@@ -22,7 +22,8 @@ uint16_t getVCC()
         valve.onClose();
     }
     // Замеряем напряжение батареи
-    uint16_t AVG = Adc::getAVGofN(50);
+    uint16_t ADCavg = Adc::getAVGofN(BAT_AVG_NUMBER);
+    LOG(ADCavg);
     // Выкл. преобзователь и реле
     valve.off();
     Adc::disable();
@@ -33,16 +34,17 @@ uint16_t getVCC()
     // VCC = Vref*ADCavg*(r1+r2)/1024*r2
     // VCC = Vref*ADCavg*(3000/1024*1000)
     // VCC = Vref*ADCavg*(3/1024)
+#ifdef SERIAL_LOG_ON
+    LOG("Bat voltage:");
+    LOG((ADCavg * VCC * DIVIDER_COEF / 1023) - V_BAT_CORR);
+#endif
 
-    uint16_t volt = round((VREF * AVG * 3) / 1024);
-    if (volt <= MIN_BAT_LEVEL)
+    if (ADCavg <= (MIN_BAT_LEVEL + V_BAT_CORR) * 1023 / (VCC * DIVIDER_COEF))
     {
         lowBat = 1;
+        zummerRun(battery_low);
+        LOG("lowBat = 1");
     }
 
-#ifdef SERIAL_LOG_MAIN_ON
-    Serial.print("Напряжение батареи: ");
-    Serial.println(volt);
-#endif
-    return volt;
+    return ADCavg;
 }

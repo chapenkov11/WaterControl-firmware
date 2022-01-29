@@ -2,6 +2,7 @@
 #include <util/delay.h>
 #include "timer2.h"
 #include "sleepTimer.h"
+#include "debug.h"
 
 void initSleepTimer()
 {
@@ -18,10 +19,10 @@ void initSleepTimer()
     // 32                ~0,0009765625      0,25
     // 8                 ~0,0002441         0,0625
     // 1                 ~0,000030517       0,0078125
-
+    LOG("initSleepTimer");
     Timer2::init_async(presc_256); // переполняется через 2 сек
+
     // разрешаем прерывания
-    SREG |= (1 << (SREG_I)); // глобально разрешить прерывания
     //TIMSK |= (1<<(OCIE2)); // вкл. прерывание совпадения
     TIMSK |= (1 << (TOIE2)); // вкл. прерывание переполнения
 }

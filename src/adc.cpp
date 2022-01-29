@@ -38,10 +38,10 @@ uint16_t Adc::getOne()
 
 uint16_t Adc::getAVGofN(int N)
 {
-    uint64_t ADCsumm = 0;
-    for (uint8_t i = 0; i <= N; i++)
+    uint32_t ADCsumm = 0;
+    for (uint8_t i = 0; i < N; i++)
     {
         ADCsumm += Adc::getOne();
     }
-    return (uint16_t)ADCsumm / N;
+    return (uint16_t)(ADCsumm / N);
 }

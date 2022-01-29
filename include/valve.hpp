@@ -32,10 +32,11 @@ extern uint32_t time;
 
 /* Необходимые параметры класса:
 - пин включения преобразователя
-- пин включения реверса (управление H-мостом)
+- вход управление H-моста 1
+- вход управление H-моста 2
 - вход АЦП для измерения тока
 */
-template <class PIN_POWER, class PIN_DIRECTION, ADCinput ADC_INPUT>
+template <class PIN_POWER, class PIN_DRIVER_IN_1, class PIN_DRIVER_IN_2, ADCinput ADC_INPUT>
 class Valve
 {
 private:
@@ -52,9 +53,9 @@ public:
     void setPosition(ValvePosition position);
     ValvePosition getPosition();
     ValveStatus getStatus();
-    void off(); // управление питанием мотора и реверсом
-    void onClose();
-    void onOpen();
+    void off();     // управление питанием мотора и реверсом, выключить
+    void onClose(); // запуск на закрытие
+    void onOpen();  // запуск на открытие
 };
 
 #endif

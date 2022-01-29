@@ -1,7 +1,9 @@
-#include "timer2.h"
 #include <avr/io.h>
-#include <avr/interrupt.h>
-#include <avr/delay.h>
+// #include <avr/interrupt.h>
+#include <util/delay.h>
+#include "timer2.h"
+#include "debug.h"
+#include "settings.h"
 
 void Timer2::init_async(T2_prescaler prescaler)
 {

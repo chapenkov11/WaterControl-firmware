@@ -1,5 +1,6 @@
 #include <avr/interrupt.h>
 #include "time.h"
+#include "settings.h"
 
 uint32_t time = 0;                      // Системное время - инкремент через 2 сек
 static volatile uint32_t overflowCount; // Счетчик переполнений таймера Т2

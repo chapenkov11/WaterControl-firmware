@@ -4,7 +4,7 @@
 #include "interrupts.h"
 #include "debug.h"
 
-volatile bool alarmFlag = 0; // 1 - тревога
+bool alarmFlag = 0; // 1 - тревога
 
 void INT0init()
 {
