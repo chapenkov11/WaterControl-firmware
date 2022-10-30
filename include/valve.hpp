@@ -3,6 +3,14 @@
 
 #include <stdio.h>
 #include "adc.h"
+// #include <util/delay.h>
+// #include "settings.h"
+// #include "sleepTimer.h"
+// #include "debug.h"
+// #include "interrupts.h"
+// #include "zummer.h"
+
+// #include "power.h"
 
 // Возможное положение крана
 enum ValvePosition : bool
@@ -36,7 +44,7 @@ extern uint32_t time;
 - вход управление H-моста 2
 - вход АЦП для измерения тока
 */
-template <class PIN_POWER, class PIN_DRIVER_IN_1, class PIN_DRIVER_IN_2, ADCinput ADC_INPUT>
+template <class PIN_DRIVER_IN_1, class PIN_DRIVER_IN_2, ADCinput ADC_INPUT>
 class Valve
 {
 private:
@@ -53,9 +61,11 @@ public:
     void setPosition(ValvePosition position);
     ValvePosition getPosition();
     ValveStatus getStatus();
-    void off();     // управление питанием мотора и реверсом, выключить
-    void onClose(); // запуск на закрытие
-    void onOpen();  // запуск на открытие
+    // void powerOn(); // вкл. преобразователь
+    // void powerOff();
+    void onClose(); // направление на закрытие
+    void onOpen();  // направление на открытие
+    void onStop();  // остановить двигатель Н-мостом
 };
 
 #endif

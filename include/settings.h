@@ -5,30 +5,38 @@
 
 #define f_cpu 1000000 // частота микроконтроллера
 
+/* DEBUG */
+#define SERIAL_LOG_ON  // лог всех действий в UART, в спящий режим не уходит
+#define DEBUG_INTERVAL // короткие интервалы для проверки функций
+
 // Настройка измерения напряжения батареи
 #define VCC 5000UL           // напряжение питания, мВ (подобрать для адекватного измерения напряжения батареи)
 #define MIN_BAT_LEVEL 4500UL // минимальное напряжение батареи, мВ
 #define V_BAT_CORR 0         // поправка к отображаемому напряжению (прибавляется к нему) (подобрать для правильного отображения напряжения батареи)
 #define DIVIDER_COEF 1       // 3     // коэффициент делителя напряжения
 #define BAT_AVG_NUMBER 50    // количество измерений напряжения батареи для усреднения
-#define batAdc ADC0          // вход АЦП для измерения напряжения батареи
+#define battery_adc ADC0     // вход АЦП для измерения напряжения батареи
+typedef Pc5 BatteryDivider;  // пин подключения делителя напряжения при измерении
 
 // Для отладочной платы
-// Установка пинов МК
-// Кран 1
-typedef Pd1 valve1_power;       // PD5 выход вкл преобразователя напряжения
-typedef Pd6 valve1_driver_in_1; // вход Н-моста 1
-typedef Pd7 valve1_driver_in_2; // вход Н-моста 2
-#define valve1_adc ADC1         // датчик тока кранов
-// Кран 2
-// typedef Pd4 valve2_power;     // PD5 выход вкл преобразователя напряжения
-// typedef Pb3 valve2_direction; // PD7 выход реверса - включения реле
-// #define valve2_adc ADC0       // PC3 (ADC3) - датчик тока кранов
+// typedef Pd6 valve1_driver_in_1; // диод 1
+// typedef Pd7 valve1_driver_in_2; // диод 2
+// #define valve1_adc ADC1 // потенциометр 1
 
-typedef Pd2 AlarmInput; // PD2 вход тревоги с Gidrolock
-typedef Pd3 Button;     // PD3 кнопка управления
-typedef Pb0 Zummer;     // PD6 подключение базы транзистора пьезоизлучателя
-typedef Pd4 Led;        // Сигнальный светодиод - PB0
+// Установка пинов МК
+// Кран
+
+typedef Pc4 VALVE_POWER;        // вкл. части схемы, связанной с переключением крана (преобразователь, Н-мост, ОУ усилителя шунтов)
+typedef Pc3 valve1_driver_in_1; // вход Н-моста 1
+typedef Pc2 valve1_driver_in_2; // вход Н-моста 2
+#define valve1_adc ADC6         // датчик тока крана
+
+/* Входы датчиков и кнопок, выходы индикаторов */
+typedef Pd2 AlarmInput;      // PD2 вход тревоги с Gidrolock
+typedef Pd5 AlarmInputPower; // подача питания на схему детекции тревоги
+typedef Pd3 Button;          // PD3 кнопка управления
+typedef Pb0 Zummer;          // PD6 подключение базы транзистора пьезоизлучателя
+typedef Pd4 Led;             // Сигнальный светодиод - PB0
 
 // Установка пинов МК
 // typedef Pd5 ValvePower;     // PD5 выход вкл преобразователя напряжения
@@ -39,10 +47,6 @@ typedef Pd4 Led;        // Сигнальный светодиод - PB0
 // typedef Pb0 Led;            // Сигнальный светодиод - PB0
 // PC3 (ADC3) - датчик тока кранов
 // PC2 (ADC2) - напряжение батареи
-
-// DEBUG
-#define SERIAL_LOG_ON  // лог всех действий в UART, в спящий режим не уходит
-#define DEBUG_INTERVAL // короткие интервалы для проверки функций
 
 // Интервалы времени
 #ifndef DEBUG_INTERVAL
@@ -58,7 +62,7 @@ typedef Pd4 Led;        // Сигнальный светодиод - PB0
 // Отладка
 #define SLEEP_PERIOD_PER_MINUT 30 // количество периодов режима сна в минуту
 #define INTERVAL_CHECK_BAT 60     // проверка напряжения батареи
-#define INTERVAL_CHECK_VALV 180   // профилактика закисания кранов
+#define INTERVAL_CHECK_VALV 15    // профилактика закисания кранов
 #define INTERVAL_SIGNAL 15        // интервал сигнализирования о проблеме (низкий заряд батареи, тревога)
 #define INTERVAL_LED 10           // интервал мигания светодиодом
 #endif

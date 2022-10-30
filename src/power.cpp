@@ -1,31 +1,33 @@
 #include <util/delay.h>
 #include "adc.h"
-#include "valve.h"
+// #include "valves.h"
 #include "settings.h"
+#include "zummer.h"
 #include "debug.h"
 
 bool lowBat = 0; // заряд батареи, 1 - низкий
-extern Valve<valve1_power, valve1_driver_in_1, valve1_driver_in_2, valve1_adc> valve;
 
 // TODO: измерение напряжения по подключаемому делителю
 uint16_t getVCC()
 {
     Adc::enable();
-    Adc::setInput(batAdc);
+    Adc::setInput(battery_adc);
+    BatteryDivider::Set(1); // подключить делитель
 
-    if (valve.getPosition() == OPEN)
-    {
-        valve.onOpen();
-    }
-    else
-    {
-        valve.onClose();
-    }
+    // if (valve.getPosition() == OPEN)
+    // {
+    //     valve.onOpen();
+    // }
+    // else
+    // {
+    //     valve.onClose();
+    // }
+
     // Замеряем напряжение батареи
     uint16_t ADCavg = Adc::getAVGofN(BAT_AVG_NUMBER);
     LOG(ADCavg);
     // Выкл. преобзователь и реле
-    valve.off();
+    // valve.off();
     Adc::disable();
     // Делитель 2000/1000 Om
     // r1 = 2000, r2 = 1000

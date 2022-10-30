@@ -20,7 +20,6 @@
                 "C:/Users/chapenkov11/.platformio/packages/framework-arduino-avr-minicore/libraries/SoftwareSerial/src",
                 "C:/Users/chapenkov11/.platformio/packages/framework-arduino-avr-minicore/libraries/Wire/src",
                 "C:/Users/chapenkov11/.platformio/packages/framework-arduino-avr-minicore/libraries/Wire1/src",
-                "C:/Users/chapenkov11/.platformio/packages/tool-unity",
                 ""
             ],
             "browse": {
@@ -38,12 +37,11 @@
                     "C:/Users/chapenkov11/.platformio/packages/framework-arduino-avr-minicore/libraries/SoftwareSerial/src",
                     "C:/Users/chapenkov11/.platformio/packages/framework-arduino-avr-minicore/libraries/Wire/src",
                     "C:/Users/chapenkov11/.platformio/packages/framework-arduino-avr-minicore/libraries/Wire1/src",
-                    "C:/Users/chapenkov11/.platformio/packages/tool-unity",
                     ""
                 ]
             },
             "defines": [
-                "PLATFORMIO=50204",
+                "PLATFORMIO=60104",
                 "ARDUINO_AVR_ATmega8",
                 "F_CPU=1000000L",
                 "ARDUINO_ARCH_AVR",
