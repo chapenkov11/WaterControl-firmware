@@ -24,7 +24,7 @@ void Adc::init(ADCprescaler prescaler, ADCref ref)
 {
     ADCSRA |= prescaler;
     ADMUX |= ref;
-    Adc::getOne();
+    // Adc::getOne();
 }
 
 uint16_t Adc::getOne()

@@ -8,8 +8,8 @@
         {
             "name": "PlatformIO",
             "includePath": [
-                "c:/Users/chapenkov11/Workspace/WaterControl v.2 - защита от протечки/firmware/WaterControl/include",
-                "c:/Users/chapenkov11/Workspace/WaterControl v.2 - защита от протечки/firmware/WaterControl/src",
+                "c:/Users/chapenkov11/Workspace/WaterControl v.2/firmware/WaterControl/include",
+                "c:/Users/chapenkov11/Workspace/WaterControl v.2/firmware/WaterControl/src",
                 "C:/Users/chapenkov11/.platformio/packages/framework-arduino-avr-minicore/cores/MiniCore",
                 "C:/Users/chapenkov11/.platformio/packages/framework-arduino-avr-minicore/variants/standard",
                 "C:/Users/chapenkov11/.platformio/packages/framework-arduino-avr-minicore/libraries/AVR_examples/src",
@@ -25,8 +25,8 @@
             "browse": {
                 "limitSymbolsToIncludedHeaders": true,
                 "path": [
-                    "c:/Users/chapenkov11/Workspace/WaterControl v.2 - защита от протечки/firmware/WaterControl/include",
-                    "c:/Users/chapenkov11/Workspace/WaterControl v.2 - защита от протечки/firmware/WaterControl/src",
+                    "c:/Users/chapenkov11/Workspace/WaterControl v.2/firmware/WaterControl/include",
+                    "c:/Users/chapenkov11/Workspace/WaterControl v.2/firmware/WaterControl/src",
                     "C:/Users/chapenkov11/.platformio/packages/framework-arduino-avr-minicore/cores/MiniCore",
                     "C:/Users/chapenkov11/.platformio/packages/framework-arduino-avr-minicore/variants/standard",
                     "C:/Users/chapenkov11/.platformio/packages/framework-arduino-avr-minicore/libraries/AVR_examples/src",
@@ -41,7 +41,7 @@
                 ]
             },
             "defines": [
-                "PLATFORMIO=60104",
+                "PLATFORMIO=60105",
                 "ARDUINO_AVR_ATmega8",
                 "F_CPU=1000000L",
                 "ARDUINO_ARCH_AVR",

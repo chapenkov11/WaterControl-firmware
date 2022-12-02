@@ -73,11 +73,11 @@ int main()
     {
 
       /* Профилактика закисания крана - закрыть-открыть */
-      if ((time >= nextCheckValv) && (alarmFlag == 0 || lowBat == 0))
-      {
-        LOG("Prevent...");
-        mode = Mode::PREVENT;
-      }
+      // if ((time >= nextCheckValv) && (alarmFlag == 0 || lowBat == 0))
+      // {
+      //   LOG("Prevent...");
+      //   mode = Mode::PREVENT;
+      // }
 
       // Закрытие крана по тревоге
       if ((alarmFlag == 1 || lowBat == 1))
@@ -132,7 +132,7 @@ int main()
       else
       {
         /* Профилактика закисания */
-        valves_prevent_run();
+        // valves_prevent_run();
       }
     }
 

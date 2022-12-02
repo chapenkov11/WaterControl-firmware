@@ -13,30 +13,24 @@
 #define VCC 5000UL           // напряжение питания, мВ (подобрать для адекватного измерения напряжения батареи)
 #define MIN_BAT_LEVEL 4500UL // минимальное напряжение батареи, мВ
 #define V_BAT_CORR 0         // поправка к отображаемому напряжению (прибавляется к нему) (подобрать для правильного отображения напряжения батареи)
-#define DIVIDER_COEF 1       // 3     // коэффициент делителя напряжения
+#define DIVIDER_COEF 20      // 3     // коэффициент делителя напряжения
 #define BAT_AVG_NUMBER 50    // количество измерений напряжения батареи для усреднения
-#define battery_adc ADC0     // вход АЦП для измерения напряжения батареи
-typedef Pc5 BatteryDivider;  // пин подключения делителя напряжения при измерении
-
-// Для отладочной платы
-// typedef Pd6 valve1_driver_in_1; // диод 1
-// typedef Pd7 valve1_driver_in_2; // диод 2
-// #define valve1_adc ADC1 // потенциометр 1
+#define battery_adc ADC2     // вход АЦП для измерения напряжения батареи
+typedef Pd5 BatteryDivider;  // пин подключения делителя напряжения при измерении
 
 // Установка пинов МК
 // Кран
-
-typedef Pc4 VALVE_POWER;        // вкл. части схемы, связанной с переключением крана (преобразователь, Н-мост, ОУ усилителя шунтов)
-typedef Pc3 valve1_driver_in_1; // вход Н-моста 1
-typedef Pc2 valve1_driver_in_2; // вход Н-моста 2
-#define valve1_adc ADC6         // датчик тока крана
+typedef Pc5 VALVE_POWER;        // вкл. части схемы, связанной с переключением крана (преобразователь, Н-мост, ОУ усилителя шунтов)
+typedef Pd7 valve1_driver_in_1; // вход Н-моста 1
+typedef Pd4 valve1_driver_in_2; // вход Н-моста 2
+#define valve1_adc ADC3         // датчик тока крана
 
 /* Входы датчиков и кнопок, выходы индикаторов */
-typedef Pd2 AlarmInput;      // PD2 вход тревоги с Gidrolock
-typedef Pd5 AlarmInputPower; // подача питания на схему детекции тревоги
+typedef Pb1 AlarmInput;      // PD2 вход тревоги с Gidrolock
+typedef Pb2 AlarmInputPower; // подача питания на схему детекции тревоги
 typedef Pd3 Button;          // PD3 кнопка управления
-typedef Pb0 Zummer;          // PD6 подключение базы транзистора пьезоизлучателя
-typedef Pd4 Led;             // Сигнальный светодиод - PB0
+typedef Pd6 Zummer;          // PD6 подключение базы транзистора пьезоизлучателя
+typedef Pb0 Led;             // Сигнальный светодиод - PB0
 
 // Установка пинов МК
 // typedef Pd5 ValvePower;     // PD5 выход вкл преобразователя напряжения
