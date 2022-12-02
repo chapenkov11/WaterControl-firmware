@@ -3,14 +3,9 @@
 
 #include <stdio.h>
 #include "adc.h"
-// #include <util/delay.h>
-// #include "settings.h"
-// #include "sleepTimer.h"
-// #include "debug.h"
-// #include "interrupts.h"
-// #include "zummer.h"
-
-// #include "power.h"
+#include <util/delay.h>
+#include "settings.h"
+#include "debug.h"
 
 // Возможное положение крана
 enum ValvePosition : bool
@@ -19,11 +14,11 @@ enum ValvePosition : bool
     OPEN
 };
 
-// Возможные статусы крана (RUNNING - в процессе переключения, DONE - не переключается)
+// Возможные статусы крана (RUNNING - в процессе переключения, STOPPED - не переключается)
 enum ValveStatus : bool
 {
     RUNNING,
-    DONE
+    STOPPED
 };
 
 // Стадия переключения крана
@@ -44,7 +39,7 @@ extern uint32_t time;
 - вход управление H-моста 2
 - вход АЦП для измерения тока
 */
-template <class PIN_DRIVER_IN_1, class PIN_DRIVER_IN_2, ADCinput ADC_INPUT>
+template <class POWER_PIN, class REVERSE_PIN, ADCinput ADC_INPUT>
 class Valve
 {
 private:

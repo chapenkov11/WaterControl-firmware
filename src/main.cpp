@@ -9,7 +9,6 @@
 #include "settings.h"
 #include "debug.cpp"
 #include "sleepTimer.h"
-
 #include "adc.h"
 #include "valve_relay.h"
 // #include "valves.h"
@@ -19,7 +18,7 @@
 #include "time.h"
 
 // Кран
-Valve<valve1_driver_in_1, valve1_driver_in_2, valve1_adc> valve;
+Valve<VALVE_POWER, VALVE_REL_ON, valve1_adc> valve;
 
 int main()
 {
@@ -72,7 +71,7 @@ int main()
     }
     AlarmInputPower::Off();
 
-    if (valve.getStatus() == DONE) // если кран не переключается
+    if (valve.getStatus() == STOPPED)
     {
       // Закрытие крана по тревоге
       if ((alarmFlag == 1 || lowBat == 1))
