@@ -11,12 +11,15 @@
 #include "sleepTimer.h"
 
 #include "adc.h"
-// #include "valve.h"
-#include "valves.h"
+#include "valve_relay.h"
+// #include "valves.h"
 #include "power.h"
 #include "zummer.h"
 #include "interrupts.h"
 #include "time.h"
+
+// Кран
+Valve<valve1_driver_in_1, valve1_driver_in_2, valve1_adc> valve;
 
 int main()
 {
@@ -69,70 +72,53 @@ int main()
     }
     AlarmInputPower::Off();
 
-    if (valves_getStatus() == DONE)
+    if (valve.getStatus() == DONE) // если кран не переключается
     {
-
-      /* Профилактика закисания крана - закрыть-открыть */
-      // if ((time >= nextCheckValv) && (alarmFlag == 0 || lowBat == 0))
-      // {
-      //   LOG("Prevent...");
-      //   mode = Mode::PREVENT;
-      // }
-
       // Закрытие крана по тревоге
       if ((alarmFlag == 1 || lowBat == 1))
       {
-        valves_setPosition(CLOSE);
-        mode = Mode::NORMAL;
+        valve.setPosition(CLOSE);
       }
 
-      if (mode == Mode::NORMAL)
+      // Обработка нажатия кнопки
+      if (!Button::IsSet())
       {
-        // Обработка нажатия кнопки
+        _delay_ms(20);
         if (!Button::IsSet())
         {
-          _delay_ms(20);
-          if (!Button::IsSet())
+          LOG("Btn:click");
+          if ((alarmFlag == 0) && (lowBat == 0))
           {
-            LOG("Btn:click");
-            if ((alarmFlag == 0) && (lowBat == 0))
+            // Нормальный режим работы
+            // Переключение крана
+            LOG("Btn:valve");
+            if (valve.getPosition() == OPEN)
             {
-              // Нормальный режим работы
-              // Переключение крана
-              LOG("Btn:valve");
-              if (valves_getPosition() == OPEN)
-              {
-                valves_setPosition(CLOSE);
-              }
-              else
-              {
-                valves_setPosition(OPEN);
-              }
-              zummerRun(button);
+              valve.setPosition(CLOSE);
             }
             else
             {
-              // сброс тревоги и отложить на сутки сигнал низкого заряда батареи
-              LOG("Btn:rst alarm");
-              if (alarmFlag == 1)
-              {
-                alarmFlag = 0;
-                zummerRun(bip_1000);
-                _delay_ms(2000);
-              }
-              if (lowBat == 1)
-              {
-                zummerRun(battery_low);
-              }
-              nextSignal = time + 43200; // Отложить сигналы на сутки
+              valve.setPosition(OPEN);
             }
+            zummerRun(button);
+          }
+          else
+          {
+            // сброс тревоги и отложить на сутки сигнал низкого заряда батареи
+            LOG("Btn:rst alarm");
+            if (alarmFlag == 1)
+            {
+              alarmFlag = 0;
+              zummerRun(bip_1000);
+              _delay_ms(2000);
+            }
+            if (lowBat == 1)
+            {
+              zummerRun(battery_low);
+            }
+            nextSignal = time + 43200; // Отложить сигналы на сутки
           }
         }
-      }
-      else
-      {
-        /* Профилактика закисания */
-        // valves_prevent_run();
       }
     }
 
@@ -144,7 +130,7 @@ int main()
       nextCheckBat = time + INTERVAL_CHECK_BAT;
     }
 
-    valves_run();
+    valve.run();
 
     // Звуковая сигнализация при тревоге и низком заряде батареи
     if (time >= nextSignal)

@@ -5,7 +5,7 @@
 #include "debug.h"
 #include "interrupts.h"
 #include "zummer.h"
-#include "valve.hpp"
+#include "valve_relay.hpp"
 
 template <class PIN_DRIVER_IN_1, class PIN_DRIVER_IN_2, ADCinput ADC_INPUT>
 Valve<PIN_DRIVER_IN_1, PIN_DRIVER_IN_2, ADC_INPUT>::Valve()
