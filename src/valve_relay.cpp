@@ -153,7 +153,6 @@ void Valve<POWER_PIN, REVERSE_PIN, ADC_INPUT>::run()
             onStop();
             Adc::disable();
             nextCheckValv = time + INTERVAL_CHECK_VALV; // отложить проверку на закисание
-            nextCheckBat = time + INTERVAL_CHECK_BAT;   // отложить проверку батареи
             period = PAUSE;
         }
     }

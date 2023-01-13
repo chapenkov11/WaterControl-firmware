@@ -1,7 +1,6 @@
-//#include <Wire.h>
-//#include <avr/wdt.h>
+// #include <Wire.h>
+// #include <avr/wdt.h>
 #include <avr/sleep.h>
-//#include <avr/power.h>
 #include <avr/io.h>
 #include <util/delay.h>
 #include <avr/interrupt.h>
@@ -11,13 +10,12 @@
 #include "sleepTimer.h"
 #include "adc.h"
 #include "valve_relay.h"
-// #include "valves.h"
 #include "power.h"
 #include "zummer.h"
 #include "interrupts.h"
 #include "time.h"
 
-// Кран
+// Статический класс для управления краном
 Valve<VALVE_POWER, VALVE_REL_ON, valve1_adc> valve;
 
 int main()
@@ -26,34 +24,31 @@ int main()
   LOG("Start")
   SREG |= (1 << (SREG_I)); // глобально разрешить прерывания
 
+  /* Неиспользуемые порты - вход с подтяжкой (снижение энергопотребления) */
+  // DDRC = 0b00000000;
+  PORTC = 0b11010011;
+
+  // DDRB = 0b00000000;
+  PORTB = 0b11111000;
+
+  // DDRD = 0b00000000;
+  PORTD = 0b00010111;
+
   Led::SetDir(1);
   Zummer::SetDir(1);
   Button::SetDir(0);          // вход
   Button::Set(1);             // вкл. подтяжку
   AlarmInputPower::SetDir(1); // выход
-  AlarmInputPower::Set(0);    // low
-  AlarmInput::SetDir(0);
-  AlarmInput::Set(1);
-  BatteryDivider::SetDir(1); // выход
-  BatteryDivider::Set(0);    // низкий уровень
-  VALVE_POWER::SetDir(1);    // output
-  VALVE_POWER::Off();
-
+  AlarmInputPower::Set(1);    // высокий
+  AlarmInput::SetDir(0);      // вход
+  AlarmInput::Set(1);         // подтяжка
+  BatteryDivider::SetDir(1);  // выход
+  BatteryDivider::Set(0);     // низкий уровень
   zummerInit();
   zummerRun(bip_2000);
   initSleepTimer();
-  Adc::init(presc_128, ref_Vcc); //Делитель 128 = 64 кГц, опора на VCC
+  Adc::init(presc_128, ref_Vcc); // Делитель 128 = 64 кГц, опора на VCC
   getVCC();                      // измерение батареи
-
-  /* Неиспользуемые порты - вход с подтяжкой (снижение энергопотребления) */
-  // DDRB = 0b00000001;
-  // PORTB = 0b11111110; // неиспользуемые порты - вход с подтяжкоей к VCC, PB0 - выход светодиода
-
-  // DDRD = 0b11100000;
-  // PORTD = 0b00011111; // PD2, PD3 - вход с подтяжкой, PD5, PD7 - выход, PD6 - выход зуммера
-
-  // DDRC = 0b00000000;
-  // PORTC = 0b11110011; // PC2, PC3 - вход без подтяжки
 
   /* Главный цикл */
   while (1)
@@ -62,19 +57,20 @@ int main()
     time_update();
 
     // Проверка входа тревоги
-    AlarmInputPower::On();
-    if (!AlarmInput::IsSet() && alarmFlag != 1)
+    if (!AlarmInput::IsSet() && alarmFlag != 1 && (valve.getPosition() == OPEN))
     {
       LOG("Leak...");
       alarmFlag = 1;
       zummerRun(alarm);
+      AlarmInput::Set(0);         // выкл. подтяжку, входы для уменьшения энергопотребления
+      AlarmInputPower::SetDir(0); // вход
+      AlarmInputPower::Set(0);    // выкл. подтяжку
     }
-    AlarmInputPower::Off();
 
     if (valve.getStatus() == STOPPED)
     {
       // Закрытие крана по тревоге
-      if ((alarmFlag == 1 || lowBat == 1))
+      if ((alarmFlag == 1 || lowBat == 1) && (valve.getPosition() == OPEN))
       {
         valve.setPosition(CLOSE);
       }
@@ -94,12 +90,22 @@ int main()
             if (valve.getPosition() == OPEN)
             {
               valve.setPosition(CLOSE);
+              zummerRun(button);
             }
             else
             {
-              valve.setPosition(OPEN);
+              getVCC();
+              nextCheckBat = time + INTERVAL_CHECK_BAT; // отложить проверку батареи
+              if (lowBat == 0)                          // при низком заряде батареи не открывать
+              {
+                valve.setPosition(OPEN);
+                // вкл. вход тревоги
+                AlarmInputPower::Set(1);    // вкл. подтяжку
+                AlarmInputPower::SetDir(1); // выход
+                AlarmInput::Set(1);         // вкл. подтяжку
+                zummerRun(button);
+              }
             }
-            zummerRun(button);
           }
           else
           {
@@ -194,7 +200,7 @@ int main()
 
 #ifndef SERIAL_LOG_ON
     // Если краны и зуммер отработали - уход в сон
-    if (valves_getStatus() == DONE && !(zummerIsBusy()) && mode == Mode::NORMAL)
+    if (valve.getStatus() == STOPPED && !(zummerIsBusy()))
     {
       // Засыпаем
       set_sleep_mode(SLEEP_MODE_PWR_SAVE);
