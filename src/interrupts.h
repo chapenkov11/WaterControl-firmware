@@ -2,7 +2,7 @@
 #define interrupts_h
 
 extern bool alarmFlag;
-extern volatile uint32_t sleepCount;
+// extern volatile uint32_t sleepCount;
 
 void INT0init();
 

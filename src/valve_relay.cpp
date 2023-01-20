@@ -81,7 +81,7 @@ void Valve<POWER_PIN, REVERSE_PIN, ADC_INPUT>::run()
         */
 
         // получаем остаток от деления времени переключения на длительность цикла
-        int N = (time - startSwitch) % (MAX_SWITCH_TIME + PAUSE_TIME + REVERS_TIME + PAUSE_TIME);
+        uint8_t N = (time - startSwitch) % (MAX_SWITCH_TIME + PAUSE_TIME + REVERS_TIME + PAUSE_TIME);
 
         if (N < MAX_SWITCH_TIME && period != NORMAL)
         {
@@ -129,7 +129,7 @@ void Valve<POWER_PIN, REVERSE_PIN, ADC_INPUT>::run()
             onStop();
         }
 
-        if (getValveStatus() == STOPPED && period == NORMAL)
+        if (period == NORMAL && getValveStatus() == STOPPED)
         {
             count--;
             LOG("count--");
@@ -138,7 +138,6 @@ void Valve<POWER_PIN, REVERSE_PIN, ADC_INPUT>::run()
         // Переключение крана закончено
         if (count == 0)
         {
-            // getVCC();
             if (goalPosition == OPEN)
             {
                 currentPosition = OPEN;
@@ -152,7 +151,7 @@ void Valve<POWER_PIN, REVERSE_PIN, ADC_INPUT>::run()
             status = STOPPED;
             onStop();
             Adc::disable();
-            nextCheckValv = time + INTERVAL_CHECK_VALV; // отложить проверку на закисание
+            // nextCheckValv = time + INTERVAL_CHECK_VALV; // отложить проверку на закисание
             period = PAUSE;
         }
     }

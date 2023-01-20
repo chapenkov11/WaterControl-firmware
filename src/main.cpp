@@ -1,5 +1,3 @@
-// #include <Wire.h>
-// #include <avr/wdt.h>
 #include <avr/sleep.h>
 #include <avr/io.h>
 #include <util/delay.h>
@@ -38,10 +36,10 @@ int main()
   Zummer::SetDir(1);
   Button::SetDir(0);          // вход
   Button::Set(1);             // вкл. подтяжку
-  AlarmInputPower::SetDir(1); // выход
-  AlarmInputPower::Set(1);    // высокий
+  AlarmInputPower::SetDir(0); // вход
+  AlarmInputPower::Set(0);    // без подтяжки
   AlarmInput::SetDir(0);      // вход
-  AlarmInput::Set(1);         // подтяжка
+  AlarmInput::Set(0);         // без подтяжки
   BatteryDivider::SetDir(1);  // выход
   BatteryDivider::Set(0);     // низкий уровень
   zummerInit();
@@ -65,6 +63,7 @@ int main()
       AlarmInput::Set(0);         // выкл. подтяжку, входы для уменьшения энергопотребления
       AlarmInputPower::SetDir(0); // вход
       AlarmInputPower::Set(0);    // выкл. подтяжку
+      nextSignal = time + INTERVAL_SIGNAL;
     }
 
     if (valve.getStatus() == STOPPED)

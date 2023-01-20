@@ -47,8 +47,7 @@ private:
     ValvePosition currentPosition = OPEN; // текущее положение крана
     ValveStatus status = RUNNING;         // текущий статус крана
     ValveStatus getValveStatus();         // измерить ток крана и определить состояние крана
-
-    uint16_t startSwitch; // время начала переключения крана
+    uint32_t startSwitch;                 // время начала переключения крана
 
 public:
     Valve();
@@ -56,8 +55,6 @@ public:
     void setPosition(ValvePosition position);
     ValvePosition getPosition();
     ValveStatus getStatus();
-    // void powerOn(); // вкл. преобразователь
-    // void powerOff();
     void onClose(); // направление на закрытие
     void onOpen();  // направление на открытие
     void onStop();  // остановить двигатель Н-мостом
