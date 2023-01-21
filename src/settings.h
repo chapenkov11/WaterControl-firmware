@@ -6,7 +6,7 @@
 #define f_cpu 1000000 // частота микроконтроллера
 
 /* DEBUG */
-// #define SERIAL_LOG_ON  // лог всех действий в UART, в спящий режим не уходит
+// #define SERIAL_LOG_ON // лог всех действий в UART
 // #define DEBUG_INTERVAL // короткие интервалы для проверки функций
 
 // Настройка измерения напряжения батареи
@@ -35,18 +35,19 @@ typedef Pb0 Led;             // cигнальный светодиод
 #ifndef DEBUG_INTERVAL
 
 // Нормальный режим
-#define SLEEP_PERIOD_PER_MINUT 30L                                // количество периодов таймера сна в минуту
+// #define SLEEP_PERIOD_PER_MINUT 30L                                // количество периодов таймера сна в минуту
+#define SLEEP_PERIOD_PER_MINUT 60L                                // количество периодов таймера сна в минуту
 #define INTERVAL_CHECK_BAT SLEEP_PERIOD_PER_MINUT * 60 * 24       // 1 раз в сутки - проверка напряжения батареи
 #define INTERVAL_CHECK_VALV SLEEP_PERIOD_PER_MINUT * 60 * 24 * 14 // 2 недели - профилактика закисания кранов
 #define INTERVAL_SIGNAL SLEEP_PERIOD_PER_MINUT * 2                // 2 мин - интервал сигнализирования о проблеме (низкий заряд батареи, тревога)
-#define INTERVAL_LED 10                                           // 20 сек - интервал мигания светодиодом
+#define INTERVAL_LED 20                                           // 20 сек - интервал мигания светодиодом
 #else
 
 // Отладка
-#define SLEEP_PERIOD_PER_MINUT 30 // количество периодов режима сна в минуту
+#define SLEEP_PERIOD_PER_MINUT 60 // количество периодов режима сна в минуту
 #define INTERVAL_CHECK_BAT 60     // проверка напряжения батареи
 #define INTERVAL_CHECK_VALV 15    // профилактика закисания кранов
-#define INTERVAL_SIGNAL 15        // интервал сигнализирования о проблеме (низкий заряд батареи, тревога)
+#define INTERVAL_SIGNAL 30        // интервал сигнализирования о проблеме (низкий заряд батареи, тревога)
 #define INTERVAL_LED 10           // интервал мигания светодиодом
 #endif
 
@@ -56,8 +57,8 @@ typedef Pb0 Led;             // cигнальный светодиод
 
 #define VALVE_AVG_NUMBER 20 // количество измерений тока крана для усреднения
 #define DONE_NUMBER 5       // количество получения нулевых измерения тока крана, чтобы кран считался остановившимся
-#define MAX_SWITCH_TIME 10  // (20 сек) максимальное время на переключение крана, в циклах time
-#define PAUSE_TIME 5        // (10 сек) длительность паузы на остывание преобразователя, в циклах time
-#define REVERS_TIME 3       // (6 сек) длительность противозаклинивающего маневра, в циклах time
+#define MAX_SWITCH_TIME 20  // (20 сек) максимальное время на переключение крана, в циклах time
+#define PAUSE_TIME 10       // (10 сек) длительность паузы на остывание преобразователя, в циклах time
+#define REVERS_TIME 6       // (6 сек) длительность противозаклинивающего маневра, в циклах time
 
 #endif

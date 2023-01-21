@@ -1,3 +1,4 @@
+#include "power.h"
 #include <util/delay.h>
 #include "adc.h"
 #include "settings.h"
@@ -37,6 +38,6 @@ uint16_t getVCC()
         zummerRun(battery_low);
         LOG("lowBat = 1");
     }
-
+    nextCheckBat = time + INTERVAL_CHECK_BAT; // отложить проверку батареи
     return ADCavg;
 }

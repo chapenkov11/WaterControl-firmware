@@ -12,6 +12,7 @@
 #include "zummer.h"
 #include "interrupts.h"
 #include "time.h"
+#include <avr/wdt.h>
 
 // Статический класс для управления краном
 Valve<VALVE_POWER, VALVE_REL_ON, valve1_adc> valve;
@@ -39,7 +40,7 @@ int main()
   AlarmInputPower::SetDir(0); // вход
   AlarmInputPower::Set(0);    // без подтяжки
   AlarmInput::SetDir(0);      // вход
-  AlarmInput::Set(0);         // без подтяжки
+  AlarmInput::Set(1);         // без подтяжки
   BatteryDivider::SetDir(1);  // выход
   BatteryDivider::Set(0);     // низкий уровень
   zummerInit();
@@ -47,15 +48,17 @@ int main()
   initSleepTimer();
   Adc::init(presc_128, ref_Vcc); // Делитель 128 = 64 кГц, опора на VCC
   getVCC();                      // измерение батареи
+  wdt_enable(WDTO_2S);           // на VCC 3V период около 2.2 сек
 
   /* Главный цикл */
   while (1)
   {
+    wdt_reset();
     LOG("Loop start");
     time_update();
 
     // Проверка входа тревоги
-    if (!AlarmInput::IsSet() && alarmFlag != 1 && (valve.getPosition() == OPEN))
+    if (alarmFlag != 1 && (valve.getPosition() == OPEN) && !AlarmInput::IsSet())
     {
       LOG("Leak...");
       alarmFlag = 1;
@@ -63,7 +66,6 @@ int main()
       AlarmInput::Set(0);         // выкл. подтяжку, входы для уменьшения энергопотребления
       AlarmInputPower::SetDir(0); // вход
       AlarmInputPower::Set(0);    // выкл. подтяжку
-      nextSignal = time + INTERVAL_SIGNAL;
     }
 
     if (valve.getStatus() == STOPPED)
@@ -94,8 +96,7 @@ int main()
             else
             {
               getVCC();
-              nextCheckBat = time + INTERVAL_CHECK_BAT; // отложить проверку батареи
-              if (lowBat == 0)                          // при низком заряде батареи не открывать
+              if (lowBat == 0) // при низком заряде батареи не открывать
               {
                 valve.setPosition(OPEN);
                 // вкл. вход тревоги
@@ -114,27 +115,26 @@ int main()
             {
               alarmFlag = 0;
               zummerRun(bip_1000);
-              _delay_ms(2000);
+              _delay_ms(1000);
             }
             if (lowBat == 1)
             {
               zummerRun(battery_low);
+              nextSignal = time + 43200; // Отложить звуковой сигнал на сутки
             }
-            nextSignal = time + 43200; // Отложить сигналы на сутки
           }
         }
       }
     }
+
+    valve.run();
 
     /* Проверка напряжения батареи */
     if (time >= nextCheckBat)
     {
       LOG("Bat volt mes");
       getVCC();
-      nextCheckBat = time + INTERVAL_CHECK_BAT;
     }
-
-    valve.run();
 
     // Звуковая сигнализация при тревоге и низком заряде батареи
     if (time >= nextSignal)
@@ -144,12 +144,11 @@ int main()
       {
         zummerRun(alarm);
       }
-
-      if (lowBat == 1)
+      else if (lowBat == 1)
       {
         zummerRun(battery_low);
       }
-      if (lowBat && alarmFlag)
+      else if (lowBat && alarmFlag)
       {
         zummerRun(alarm_and_battery_low);
       }
@@ -193,20 +192,19 @@ int main()
       nextLed = time + INTERVAL_LED;
     }
 
-#ifdef SERIAL_LOG_ON
-    _delay_ms(1000);
-#endif
-
-#ifndef SERIAL_LOG_ON
     // Если краны и зуммер отработали - уход в сон
     if (valve.getStatus() == STOPPED && !(zummerIsBusy()))
     {
+#ifdef SERIAL_LOG_ON
+      Serial.flush(); // ждем окончания отправки по UART
+#endif
       // Засыпаем
+      wdt_reset();
       set_sleep_mode(SLEEP_MODE_PWR_SAVE);
       sleep_enable();
       sleep_cpu();
       sleep_disable();
+      wdt_reset();
     }
-#endif
   }
 }

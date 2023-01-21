@@ -3,8 +3,7 @@
 
 #include <avr/io.h>
 
-extern bool lowBat; // заряд батареи, 1 - низкий
-// extern Valve valve;
+extern uint32_t nextCheckBat;
 
 uint16_t getVCC();
 
